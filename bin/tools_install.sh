@@ -11,6 +11,13 @@ echo -e "\033[1;35m
 \033[0m"
 echo -e "\033[1;35m[少女终端] 正在准备工具列表...\033[0m"
 
+# 检查是否已安装过
+if [ -f ~/.pinkshell/tools_installed ]; then
+    echo -e "\033[1;35m[少女终端] 工具已完整安装，跳过本次安装\033[0m"
+    echo -e "\033[1;36m如需重新安装，请删除标记文件: rm ~/.pinkshell/tools_installed\033[0m"
+    exit 0
+fi
+
 # 定义工具领域及工具包
 declare -A TOOL_SETS
 TOOL_SETS["开发工具"]="git clang python nodejs"
@@ -32,6 +39,26 @@ for category in "${!TOOL_SETS[@]}"; do
   done
 done
 
+# 更可靠的检查函数
+is_installed() {
+    # 检查二进制路径
+    if command -v "$1" >/dev/null 2>&1; then
+        return 0
+    fi
+    
+    # 检查包管理器状态
+    if pkg show "$1" 2>/dev/null | grep -q "installed: yes"; then
+        return 0
+    fi
+    
+    # 检查文件是否存在
+    if [ -f "/data/data/com.termux/files/usr/bin/$1" ]; then
+        return 0
+    fi
+    
+    return 1
+}
+
 # 遍历安装
 current_tool=0
 for category in "${!TOOL_SETS[@]}"; do
@@ -43,8 +70,10 @@ for category in "${!TOOL_SETS[@]}"; do
     progress=$((current_tool * 100 / total_tools))
     echo -e "\033[1;33m[$progress%] 工具 $current_tool/$total_tools\033[0m"
     
-    if ! command -v "$pkg" >/dev/null 2>&1; then
+    if ! is_installed "$pkg"; then
       echo -e " → 安装 \033[1;34m$pkg\033[0m..."
+      
+      # 静默安装，只显示必要信息
       if pkg install -y "$pkg" >/dev/null 2>&1; then
         echo -e "   \033[1;32m✓ 安装成功\033[0m"
         ((installed_tools++))
@@ -61,8 +90,8 @@ done
 # 安装结果统计
 echo -e "\n\033[1;35m[安装报告]\033[0m"
 echo -e "  \033[1;36m总工具数: \033[1;37m$total_tools\033[0m"
-echo -e "  \033[1;32m成功安装: \033[1;37m$installed_tools\033[0m"
-echo -e "  \033[1;35m已安装跳过: \033[1;37m$skipped_tools\033[0m"
+echo -e "  \033[1;32m本次安装: \033[1;37m$installed_tools\033[0m"
+echo -e "  \033[1;35m已存在跳过: \033[1;37m$skipped_tools\033[0m"
 echo -e "  \033[1;33m失败: \033[1;37m$((total_tools - installed_tools - skipped_tools))\033[0m"
 
 # 最终完成提示
@@ -71,3 +100,8 @@ echo -e "█                                     █"
 echo -e "█   🎀 所有工具安装完毕！请尽情使用  🎀  █"
 echo -e "█                                     █"
 echo -e "█████████████████████████████████\033[0m"
+
+# 创建安装标记文件
+mkdir -p ~/.pinkshell
+touch ~/.pinkshell/tools_installed
+echo -e "\033[1;35m[少女终端] 已创建安装标记文件，下次启动将跳过安装\033[0m"

@@ -16,6 +16,11 @@ NC='\033[0m'
 
 # 检查依赖
 check_dependencies() {
+    # 新增：检查工具安装标记
+    if [ -f ~/.pinkshell/tools_installed ]; then
+        return
+    fi
+    
     # 检查lolcat
     if ! command -v lolcat &> /dev/null; then
         echo -e "${YELLOW}正在安装lolcat...${NC}"
@@ -29,6 +34,10 @@ check_dependencies() {
             pkg install -y $tool
         fi
     done
+    
+    # 新增：运行工具安装器
+    echo -e "${PURPLE}[少女终端] 正在运行工具安装器...${NC}"
+    bash ~/pinkshell/bin/tools_install.sh
 }
 
 # 动态标题
