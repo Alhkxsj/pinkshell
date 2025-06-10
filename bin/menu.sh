@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# [快手啊泠好困想睡觉]专属Termux工具箱 v3.0
+# [快手啊泠好困想睡觉]专属Termux工具箱 v3.5
 
 # 加载配置
 if [ -f ~/.pinkshell/.config/config.conf ]; then
@@ -111,10 +111,11 @@ system_tools() {
     welcome_banner
     echo -e "${BLUE}========== 系统工具 ==========${NC}"
     echo -e "1. 系统信息"
-    echo -e "2. 存储空间"
+    echo -e "2. 存储空间分析"
     echo -e "3. 进程管理"
     echo -e "4. 系统更新"
-    echo -e "5. 磁盘分析"
+    echo -e "5. 磁盘使用详情"
+    echo -e "6. 更换软件源"
     echo -e "0. 返回主菜单\n"
     echo -e "${BLUE}==============================${NC}"
 
@@ -131,8 +132,13 @@ system_tools() {
         read -p "按回车键返回..."
         ;;
       2)
-        echo -e "${GREEN}存储空间信息:${NC}"
-        disk_analysis
+        echo -e "${GREEN}存储空间分析:${NC}"
+        # 显示更详细的存储信息
+        echo -e "${CYAN}文件系统使用情况:${NC}"
+        df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+        echo -e "\n${CYAN}目录大小排行:${NC}"
+        du -h -d 1 ~/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+        read -p "按回车键返回..."
         ;;
       3)
         process_manager
@@ -143,10 +149,85 @@ system_tools() {
         read -p "更新完成，按回车键返回..."
         ;;
       5)
+        echo -e "${GREEN}磁盘使用详情:${NC}"
         disk_analysis
+        ;;
+      6)
+        change_termux_source
         ;;
       0)
         main_menu
+        return
+        ;;
+      *)
+        echo -e "${RED}无效输入！${NC}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+# 更换软件源
+change_termux_source() {
+  while true; do
+    welcome_banner
+    echo -e "${BLUE}========== 更换软件源 ==========${NC}"
+    echo -e "${YELLOW}当前软件源:${NC}"
+    grep -oP '(?<=@).*' $PREFIX/etc/apt/sources.list || echo "默认源"
+    
+    echo -e "\n${GREEN}请选择软件源:${NC}"
+    echo -e "1. 清华大学源 (推荐)"
+    echo -e "2. 阿里云源"
+    echo -e "3. 南京大学源"
+    echo -e "4. 官方源"
+    echo -e "5. 自定义源"
+    echo -e "0. 返回上一级\n"
+    echo -e "${BLUE}================================${NC}"
+
+    read -p "请输入选项 : " choice
+    case $choice in
+      1)
+        echo -e "${CYAN}正在更换为清华大学源...${NC}"
+        sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为清华大学源！${NC}"
+        read -p "按回车键返回..."
+        ;;
+      2)
+        echo -e "${CYAN}正在更换为阿里云源...${NC}"
+        sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.aliyun.com/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为阿里云源！${NC}"
+        read -p "按回车键返回..."
+        ;;
+      3)
+        echo -e "${CYAN}正在更换为南京大学源...${NC}"
+        sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirror.nju.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为南京大学源！${NC}"
+        read -p "按回车键返回..."
+        ;;
+      4)
+        echo -e "${CYAN}正在更换为官方源...${NC}"
+        sed -i 's@^#deb\(.*\)@deb\1@' $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为官方源！${NC}"
+        read -p "按回车键返回..."
+        ;;
+      5)
+        read -p "请输入自定义源地址: " custom_source
+        if [ -z "$custom_source" ]; then
+          echo -e "${RED}源地址不能为空！${NC}"
+          sleep 1
+          continue
+        fi
+        echo -e "${CYAN}正在更换为自定义源...${NC}"
+        sed -i "s@^\(deb.*stable main\)\$@#\1\ndeb $custom_source stable main@" $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为自定义源！${NC}"
+        read -p "按回车键返回..."
+        ;;
+      0)
         return
         ;;
       *)
@@ -183,16 +264,25 @@ network_tools() {
         ;;
       2)
         echo -e "${YELLOW}正在测试网络速度...${NC}"
-        if command -v speedtest &>/dev/null; then
-          speedtest | lolcat
-        else
-          echo -e "${CYAN}正在安装speedtest-cli...${NC}"
-          pkg install speedtest-cli -y
-          if command -v speedtest &>/dev/null; then
-            speedtest | lolcat
-          else
-            echo -e "${RED}安装失败！请手动安装: pkg install speedtest-cli${NC}"
+        # 使用Termux支持的替代测速方法
+        if command -v iperf3 &>/dev/null; then
+          echo -e "${CYAN}使用iperf3测试网络速度...${NC}"
+          echo -e "${YELLOW}正在连接测试服务器...${NC}"
+          iperf3 -c speedtest.serverius.net -p 5002 -P 4 | lolcat
+        elif command -v curl &>/dev/null; then
+          echo -e "${CYAN}使用文件下载速度测试...${NC}"
+          echo -e "${YELLOW}测试下载速度（通过Google）...${NC}"
+          start_time=$(date +%s)
+          download_size=$(curl -s -w '%{size_download}' -o /dev/null https://www.google.com)
+          end_time=$(date +%s)
+          time_elapsed=$((end_time - start_time))
+          if [ $time_elapsed -eq 0 ]; then
+              time_elapsed=1
           fi
+          speed=$((download_size * 8 / time_elapsed / 1000))
+          echo -e "${GREEN}下载速度: ${speed} kbps${NC}" | lolcat
+        else
+          echo -e "${RED}无法进行网络测速，请先安装curl${NC}"
         fi
         read -p "按回车键返回..."
         ;;
@@ -233,7 +323,9 @@ network_tools() {
       5)
         echo -e "${GREEN}网络诊断信息:${NC}"
         echo -e "${CYAN}网络连接状态:${NC}"
+        echo -e "${YELLOW}正在测试与Google的连接...${NC}"
         ping -c 4 google.com | lolcat
+        
         echo -e "\n${CYAN}路由追踪:${NC}"
         if command -v traceroute &>/dev/null; then
           traceroute google.com | lolcat
@@ -246,6 +338,10 @@ network_tools() {
             echo -e "${RED}安装失败！请手动安装: pkg install traceroute${NC}"
           fi
         fi
+        
+        echo -e "\n${CYAN}DNS解析:${NC}"
+        echo -e "${YELLOW}正在测试DNS解析...${NC}"
+        nslookup google.com | lolcat
         read -p "按回车键返回..."
         ;;
       0)
@@ -259,6 +355,7 @@ network_tools() {
     esac
   done
 }
+
 # 开发工具菜单
 dev_tools() {
   while true; do
@@ -317,7 +414,7 @@ dev_tools() {
         echo -e "${GREEN}请选择代码编辑器:${NC}"
         echo -e "1. Nano (简单易用)"
         echo -e "2. Vim (功能强大)"
-        echo -e "3. Emacs (高度可定制)"
+        echo -e "3. Micro (现代终端编辑器)"
         read -p "请选择: " editor_choice
 
         case $editor_choice in
@@ -338,11 +435,12 @@ dev_tools() {
             fi
             ;;
           3)
-            if command -v emacs &>/dev/null; then
-              emacs
+            if command -v micro &>/dev/null; then
+              micro
             else
-              pkg install emacs -y
-              emacs
+              echo -e "${CYAN}正在安装Micro编辑器...${NC}"
+              pkg install micro -y
+              micro
             fi
             ;;
           *)
@@ -379,10 +477,10 @@ fun_tools() {
   while true; do
     welcome_banner
     echo -e "${BLUE}========== 娱乐功能 ==========${NC}"
-    echo -e "1. 小游戏"
-    echo -e "2. 音乐播放"
-    echo -e "3. 视频播放"
-    echo -e "4. 趣味文本"
+    echo -e "1. 猜数字小游戏"
+    echo -e "2. 音乐播放器"
+    echo -e "3. 视频播放器"
+    echo -e "4. 趣味文本生成"
     echo -e "5. 泠泠笑话"
     echo -e "0. 返回主菜单\n"
     echo -e "${BLUE}==============================${NC}"
@@ -390,9 +488,7 @@ fun_tools() {
     read -p "请输入选项 : " choice
     case $choice in
       1)
-        echo -e "${PURPLE}正在加载小游戏...${NC}"
-        # 简单的小游戏
-        echo -e "${GREEN}猜数字游戏${NC}"
+        echo -e "${PURPLE}猜数字小游戏${NC}"
         number=$((RANDOM % 100 + 1))
         echo -e "我已经想了一个1-100之间的数字，猜猜是多少？"
         attempts=0
@@ -433,9 +529,11 @@ fun_tools() {
             fi
 
             if command -v mpv &>/dev/null; then
+              echo -e "${YELLOW}正在播放音乐...${NC}"
               mpv "$music_url"
             else
               pkg install mpv -y
+              echo -e "${YELLOW}正在播放音乐...${NC}"
               mpv "$music_url"
             fi
             ;;
@@ -451,6 +549,7 @@ fun_tools() {
               continue
             fi
 
+            echo -e "${YELLOW}正在播放音乐...${NC}"
             mpv "$music_file"
             ;;
           *)
@@ -469,9 +568,11 @@ fun_tools() {
         fi
 
         if command -v mpv &>/dev/null; then
+          echo -e "${YELLOW}正在播放视频...${NC}"
           mpv "$video_path"
         else
           pkg install mpv -y
+          echo -e "${YELLOW}正在播放视频...${NC}"
           mpv "$video_path"
         fi
         read -p "按回车键返回..."
@@ -551,45 +652,50 @@ personal_settings() {
   while true; do
     welcome_banner
     echo -e "${BLUE}========== 个性化设置 ==========${NC}"
-    echo -e "1. 更改主题"
-    echo -e "2. 设置别名"
-    echo -e "3. 编辑配置"
-    echo -e "4. 设置自启动"
-    echo -e "5. 泠泠专属皮肤"
+    echo -e "1. 更改主题颜色"
+    echo -e "2. 设置终端字体"
+    echo -e "3. 编辑配置文件"
+    echo -e "4. 设置泠泠专属提示符"
+    echo -e "5. 设置启动别名"
     echo -e "0. 返回主菜单\n"
     echo -e "${BLUE}================================${NC}"
 
     read -p "请输入选项 : " choice
     case $choice in
       1)
-        echo -e "${GREEN}请选择主题:${NC}"
-        echo -e "1. 深色主题"
-        echo -e "2. 浅色主题"
-        echo -e "3. 蓝色主题"
-        echo -e "4. 绿色主题"
-        echo -e "5. 粉色主题"
+        echo -e "${GREEN}请选择主题颜色:${NC}"
+        echo -e "1. 少女粉"
+        echo -e "2. 星空紫"
+        echo -e "3. 海洋蓝"
+        echo -e "4. 森林绿"
+        echo -e "5. 深色主题"
+        echo -e "6. 浅色主题"
         read -p "请选择: " theme_choice
 
         case $theme_choice in
           1)
-            termux-change-color -s dark
-            echo -e "${GREEN}已切换为深色主题${NC}"
+            termux-change-color -s pink
+            echo -e "${GREEN}已切换为少女粉主题${NC}"
             ;;
           2)
-            termux-change-color -s light
-            echo -e "${GREEN}已切换为浅色主题${NC}"
+            termux-change-color -s purple
+            echo -e "${GREEN}已切换为星空紫主题${NC}"
             ;;
           3)
             termux-change-color -s blue
-            echo -e "${GREEN}已切换为蓝色主题${NC}"
+            echo -e "${GREEN}已切换为海洋蓝主题${NC}"
             ;;
           4)
             termux-change-color -s green
-            echo -e "${GREEN}已切换为绿色主题${NC}"
+            echo -e "${GREEN}已切换为森林绿主题${NC}"
             ;;
           5)
-            termux-change-color -s pink
-            echo -e "${GREEN}已切换为粉色主题${NC}"
+            termux-change-color -s dark
+            echo -e "${GREEN}已切换为深色主题${NC}"
+            ;;
+          6)
+            termux-change-color -s light
+            echo -e "${GREEN}已切换为浅色主题${NC}"
             ;;
           *)
             echo -e "${RED}无效选择！${NC}"
@@ -598,34 +704,72 @@ personal_settings() {
         sleep 1
         ;;
       2)
-        setup_aliases
+        echo -e "${GREEN}请选择终端字体:${NC}"
+        # 列出可用字体并选择
+        if ! command -v termux-font &>/dev/null; then
+          pkg install termux-font -y
+        fi
+        
+        echo -e "1. FiraCode (程序员最爱)"
+        echo -e "2. Meslo (清晰易读)"
+        echo -e "3. SourceCodePro (专业字体)"
+        echo -e "4. Hack (简洁现代)"
+        read -p "请选择字体: " font_choice
+        
+        case $font_choice in
+          1) termux-font -f firacode ;;
+          2) termux-font -f meslo ;;
+          3) termux-font -f sourcecodepro ;;
+          4) termux-font -f hack ;;
+          *) echo -e "${RED}无效选择！${NC}" ;;
+        esac
+        
+        echo -e "${GREEN}字体已更改，重启Termux生效${NC}"
+        sleep 1
         ;;
       3)
         if [ ! -d ~/.pinkshell/.config ]; then
           mkdir -p ~/.pinkshell/.config
         fi
-        nano ~/.pinkshell/.config/config.conf
-        echo -e "${GREEN}配置已保存${NC}"
+        
+        echo -e "${GREEN}编辑配置文件...${NC}"
+        echo -e "1. 主配置文件"
+        echo -e "2. 工具箱配置"
+        read -p "请选择: " config_choice
+        
+        case $config_choice in
+          1)
+            nano ~/.pinkshell/.config/config.conf
+            echo -e "${GREEN}主配置已保存${NC}"
+            ;;
+          2)
+            nano ~/pinkshell/bin/menu.sh
+            echo -e "${GREEN}工具箱配置已保存${NC}"
+            ;;
+          *)
+            echo -e "${RED}无效选择！${NC}"
+            ;;
+        esac
+        
         sleep 1
         ;;
       4)
-        setup_autostart
-        read -p "按回车键返回..."
+        echo -e "${PURPLE}正在设置泠泠专属提示符...${NC}"
+        # 设置专属提示符
+        if grep -q "泠泠专属提示符" ~/.bashrc; then
+          sed -i '/泠泠专属提示符/d' ~/.bashrc
+        fi
+        
+        echo -e "\n# 泠泠专属提示符" >> ~/.bashrc
+        echo "PS1='\[\e[1;35m\]泠泠\[\e[0m\]@\[\e[1;36m\]\h \[\e[1;33m\]\w \[\e[1;35m\]❯\[\e[0m\] '" >> ~/.bashrc
+        
+        echo -e "${GREEN}专属提示符已设置！重启后生效${NC}"
+        echo -e "${YELLOW}提示: 输入 'source ~/.bashrc' 立即生效${NC}"
+        sleep 2
         ;;
       5)
-        echo -e "${PURPLE}正在应用泠泠专属皮肤...${NC}"
-        # 设置粉色主题
-        termux-change-color -s pink
-        # 设置特殊字体
-        if ! command -v termux-font &>/dev/null; then
-          pkg install termux-font -y
-        fi
-        termux-font -f firacode
-
-        # 创建专属提示符
-        echo "PS1='\[\e[1;35m\]泠泠\[\e[0m\]@\[\e[1;36m\]\h \[\e[1;33m\]\w \[\e[1;35m\]❯\[\e[0m\] '" >>~/.bashrc
-        echo -e "${GREEN}泠泠专属皮肤已应用！重启后生效${NC}"
-        sleep 2
+        setup_autostart
+        read -p "按回车键返回..."
         ;;
       0)
         main_menu
@@ -643,20 +787,20 @@ personal_settings() {
 setup_aliases() {
   # 设置别名，以便在命令行输入"泠"启动菜单
   if ! grep -q "alias 泠" ~/.bashrc; then
-    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >>~/.bashrc
+    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
   fi
 
   # 添加其他实用别名
   if ! grep -q "alias 更新" ~/.bashrc; then
-    echo "alias 更新='pkg update && pkg upgrade'" >>~/.bashrc
+    echo "alias 更新='pkg update && pkg upgrade'" >> ~/.bashrc
   fi
 
   if ! grep -q "alias 清理" ~/.bashrc; then
-    echo "alias 清理='pkg clean'" >>~/.bashrc
+    echo "alias 清理='pkg clean'" >> ~/.bashrc
   fi
 
   if ! grep -q "alias 存储" ~/.bashrc; then
-    echo "alias 存储='df -h'" >>~/.bashrc
+    echo "alias 存储='df -h'" >> ~/.bashrc
   fi
 
   echo -e "${GREEN}别名已设置！${NC}"
@@ -677,12 +821,13 @@ setup_autostart() {
 
   # 添加到bashrc以实现启动Termux时运行菜单
   if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-    echo -e "\n# 启动泠泠菜单" >>~/.bashrc
-    echo "if [ -f \"\$HOME/pinkshell/bin/menu.sh\" ]; then" >>~/.bashrc
-    echo "    bash \"\$HOME/pinkshell/bin/menu.sh\"" >>~/.bashrc
-    echo "fi" >>~/.bashrc
+    echo -e "\n# 启动泠泠菜单" >> ~/.bashrc
+    echo "if [ -f \"\$HOME/pinkshell/bin/menu.sh\" ]; then" >> ~/.bashrc
+    echo "    bash \"\$HOME/pinkshell/bin/menu.sh\"" >> ~/.bashrc
+    echo "fi" >> ~/.bashrc
   fi
 
+  # 设置常用别名
   setup_aliases
 
   # 提示
