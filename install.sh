@@ -1,27 +1,74 @@
 #!/bin/bash
-# 快手啊泠好困想睡觉 定制安装器
+# 少女终端工具箱安装脚本 - 无配置版
+# 项目地址: https://github.com/Alhkxsj/pinkshell
 
-# 创建目录结构
+# 颜色定义
+PINK='\033[1;35m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;36m'
+NC='\033[0m'
+
+# 显示标题
+echo -e "${PINK}"
+echo "   ██████╗ ██╗   ██╗ ██████╗ ██╗  ██╗"
+echo "  ██╔════╝ ██║   ██║██╔═══██╗██║  ██║"
+echo "  ██║  ███╗██║   ██║██║   ██║███████║"
+echo "  ██║   ██║██║   ██║██║   ██║██╔══██║"
+echo "  ╚██████╔╝╚██████╔╝╚██████╔╝██║  ██║"
+echo "   ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝"
+echo -e "${NC}"
+echo -e "${PINK}[少女终端] 安装程序启动...${NC}"
+
+# 检查依赖项
+echo -e "${YELLOW}检查必要依赖...${NC}"
+if ! command -v curl &> /dev/null; then
+    echo -e "${YELLOW}安装 curl...${NC}"
+    pkg update -y && pkg install -y curl
+fi
+
+# 创建目录结构 (完全匹配您的结构)
+echo -e "${YELLOW}创建目录结构...${NC}"
 mkdir -p ~/pinkshell/{bin,lib}
-mkdir -p ~/.pinkshell/.config
 
-# 写入基础配置
-cat > ~/.pinkshell/.config/config.conf <<EOF
-# 用户配置
-USER_NAME="快手啊泠好困想睡觉"
-THEME_COLOR="purple"
-SHOW_ANIMATION=true
-AUTHOR_SIGNATURE="Customized for 快手啊泠好困想睡觉"
-EOF
+# 下载必要文件
+echo -e "${YELLOW}下载主程序文件...${NC}"
+base_url="https://raw.githubusercontent.com/Alhkxsj/pinkshell/main"
+
+# 下载函数
+download_file() {
+    local path=$1
+    local dest=$2
+    echo -e "${BLUE}下载: $path${NC}"
+    if ! curl -fsSL -o "$dest" "${base_url}${path}"; then
+        echo -e "${YELLOW}下载失败: $path, 尝试备用源...${NC}"
+        curl -fsSL -o "$dest" "https://cdn.jsdelivr.net/gh/Alhkxsj/pinkshell${path}"
+    fi
+}
+
+# 下载核心文件 (只下载必要的文件)
+download_file "/bin/menu.sh" ~/pinkshell/bin/menu.sh
+download_file "/bin/tools_install.sh" ~/pinkshell/bin/tools_install.sh
+download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
+
+# 设置权限
+chmod +x ~/pinkshell/bin/*.sh
+chmod +x ~/pinkshell/lib/*.sh
 
 # 添加环境变量
-echo 'export PATH="$PATH:$HOME/pinkshell/bin"' >> ~/.bashrc
-echo 'source ~/pinkshell/lib/termux_utils.sh' >> ~/.bashrc
-source ~/.bashrc
+echo -e "${YELLOW}更新环境变量...${NC}"
+if ! grep -q "pinkshell/bin" ~/.bashrc; then
+    echo 'export PATH="$PATH:$HOME/pinkshell/bin"' >> ~/.bashrc
+fi
+
+if ! grep -q "termux_utils.sh" ~/.bashrc; then
+    echo 'source $HOME/pinkshell/lib/termux_utils.sh' >> ~/.bashrc
+fi
 
 # 设置别名
+echo -e "${YELLOW}创建快捷命令...${NC}"
 if ! grep -q "alias 泠" ~/.bashrc; then
-    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
+    echo "alias 泠='bash ~/pinkshell/bin/menu.sh'" >> ~/.bashrc
 fi
 
 if ! grep -q "alias 更新" ~/.bashrc; then
@@ -36,17 +83,25 @@ if ! grep -q "alias 存储" ~/.bashrc; then
     echo "alias 存储='df -h'" >> ~/.bashrc
 fi
 
-echo -e "\033[1;32m"
+# 显示完成信息
+echo -e "${GREEN}"
 echo "██████╗ ██╗   ██╗███████╗"
 echo " ██╔═══██╗██║   ██║██╔════╝"
 echo " ██║   ██║██║   ██║█████╗  "
 echo " ██║▄▄ ██║██║   ██║██╔══╝  "
 echo " ╚██████╔╝╚██████╔╝███████╗"
 echo "  ╚══▀▀═╝  ╚═════╝ ╚══════╝"
-echo -e "\033[0m"
+echo -e "${NC}"
 
-echo -e "\033[1;35m[安装完成] 专属工具箱已配置完毕！\033[0m"
-echo -e "\033[1;36m使用以下命令启动:"
-echo -e "  1. 输入 '泠' 启动菜单"
-echo -e "  2. 输入 'menu.sh' 启动菜单"
-echo -e "  3. 重启Termux会自动启动菜单\033[0m"
+echo -e "${PINK}[安装完成] 专属工具箱已配置完毕！${NC}"
+echo -e "${BLUE}使用以下命令启动:"
+echo -e "  输入 '泠' 即可启动菜单${NC}"
+
+# 首次运行工具安装器
+echo -e "${YELLOW}首次使用需要安装必要工具，请稍候...${NC}"
+bash ~/pinkshell/bin/tools_install.sh
+
+# 应用环境变量
+source ~/.bashrc 2>/dev/null
+
+echo -e "${GREEN}安装完成！请重启Termux或执行: source ~/.bashrc${NC}"
