@@ -21,10 +21,10 @@ fi
 # 定义工具领域及工具包
 declare -A TOOL_SETS
 TOOL_SETS["开发工具"]="git clang python nodejs"
-TOOL_SETS["网络工具"]="curl wget nmap netcat traceroute speedtest-cli"
+TOOL_SETS["网络工具"]="curl wget nmap netcat traceroute"
 TOOL_SETS["图形支持"]="x11-repo termux-x11"
 TOOL_SETS["影音多媒体"]="ffmpeg mpv"
-TOOL_SETS["实用工具"]="htop neofetch jq unzip zip tar"
+TOOL_SETS["实用工具"]="htop neofetch jq unzip zip tar tree"  # 添加tree
 TOOL_SETS["系统增强"]="proot-distro tsu termux-api"
 # 统计变量
 total_tools=0
