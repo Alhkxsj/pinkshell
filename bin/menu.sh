@@ -1,9 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # [快手啊泠好困想睡觉]专属Termux工具箱 v3.5
 
+# 加载配置
+if [ -f ~/.pinkshell/.config/config.conf ]; then
+  source ~/.pinkshell/.config/config.conf
+fi
 
 # 加载功能库
-source ~/pinkshell/lib/termux_utils.sh
+source $HOME/pinkshell/lib/termux_utils.sh
 
 # 颜色定义
 RED='\033[1;31m'
@@ -17,7 +21,7 @@ NC='\033[0m'
 # 检查依赖
 check_dependencies() {
   # 新增：检查工具安装标记
-  if [ -f ~/.pinkshell/tools_installed ]; then
+  if [ -f $HOME/pinkshell/tools_installed ]; then
     return
   fi
 
@@ -37,7 +41,7 @@ check_dependencies() {
 
   # 新增：运行工具安装器
   echo -e "${PURPLE}[少女终端] 正在运行工具安装器...${NC}"
-  bash ~/pinkshell/bin/tools_install.sh
+  bash $HOME/pinkshell/bin/tools_install.sh
 }
 
 # 动态标题
@@ -288,13 +292,35 @@ network_tools() {
           target="127.0.0.1"
         fi
 
+        # 优先使用 nmap
         if command -v nmap &>/dev/null; then
-          echo -e "${YELLOW}正在扫描 $target ...${NC}"
+          echo -e "${YELLOW}正在使用 nmap 扫描 $target ...${NC}"
           nmap -T4 $target | lolcat
+        
+        # 其次使用 ncat (nmap 的一部分)
+        elif command -v ncat &>/dev/null; then
+          echo -e "${YELLOW}正在使用 ncat 进行快速端口扫描 $target ...${NC}"
+          for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
+            timeout 1 ncat -zv $target $port 2>&1 | grep succeeded | lolcat
+          done
+        
+        # 使用 Python 替代方案
+        elif [ -f "$HOME/pinkshell/bin/nc" ]; then
+          echo -e "${YELLOW}正在使用 Python 端口扫描器扫描 $target ...${NC}"
+          for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
+            echo "扫描端口 $port ..."
+            $HOME/pinkshell/bin/nc $target $port <<< "QUIT" 2>/dev/null && echo "端口 $port 开放" | lolcat
+          done
+        
+        # 最后尝试 busybox
+        elif command -v busybox &>/dev/null; then
+          echo -e "${YELLOW}正在使用 busybox 扫描 $target ...${NC}"
+          for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
+            timeout 1 busybox nc -zv $target $port 2>&1 | grep succeeded | lolcat
+          done
+        
         else
-          echo -e "${CYAN}正在安装nmap...${NC}"
-          pkg install nmap -y
-          nmap -T4 $target | lolcat
+          echo -e "${RED}未找到端口扫描工具，请安装 nmap${NC}"
         fi
         read -p "按回车键返回..."
         ;;
@@ -306,13 +332,25 @@ network_tools() {
           continue
         fi
 
+        # 优先使用 aria2
         if command -v aria2c &>/dev/null; then
           echo -e "${YELLOW}正在使用aria2下载...${NC}"
           aria2c -x 16 $url
+        
+        # 其次使用 curl
+        elif command -v curl &>/dev/null; then
+          echo -e "${YELLOW}正在使用curl下载...${NC}"
+          filename=$(basename "$url")
+          curl -O $url
+          echo -e "${GREEN}文件已下载: $filename${NC}"
+        
+        # 使用 wget
+        elif command -v wget &>/dev/null; then
+          echo -e "${YELLOW}正在使用wget下载...${NC}"
+          wget $url
+        
         else
-          echo -e "${CYAN}正在安装aria2...${NC}"
-          pkg install aria2 -y
-          aria2c -x 16 $url
+          echo -e "${RED}未找到下载工具，请安装 aria2、curl 或 wget${NC}"
         fi
         read -p "按回车键返回..."
         ;;
@@ -320,7 +358,19 @@ network_tools() {
         echo -e "${GREEN}网络诊断信息:${NC}"
         echo -e "${CYAN}网络连接状态:${NC}"
         echo -e "${YELLOW}正在测试与Google的连接...${NC}"
-        ping -c 4 google.com | lolcat
+        
+        # 优先使用 ncat
+        if command -v ncat &>/dev/null; then
+          ncat -zv google.com 80 2>&1 | lolcat
+        # 其次使用 Python 替代方案
+        elif [ -f "$HOME/pinkshell/bin/nc" ]; then
+          $HOME/pinkshell/bin/nc google.com 80 <<< "HEAD / HTTP/1.1\nHost: google.com\n\n" | lolcat
+        # 使用 busybox
+        elif command -v busybox &>/dev/null; then
+          busybox nc -zv google.com 80 2>&1 | lolcat
+        else
+          ping -c 4 google.com | lolcat
+        fi
         
         echo -e "\n${CYAN}路由追踪:${NC}"
         if command -v traceroute &>/dev/null; then
