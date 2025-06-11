@@ -1,10 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # [快手啊泠好困想睡觉]专属Termux工具箱 v3.5
 
-# 加载配置
-if [ -f ~/.pinkshell/.config/config.conf ]; then
-  source ~/.pinkshell/.config/config.conf
-fi
 
 # 加载功能库
 source ~/pinkshell/lib/termux_utils.sh
