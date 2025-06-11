@@ -53,38 +53,25 @@ download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
 chmod +x ~/pinkshell/bin/*.sh
 chmod +x ~/pinkshell/lib/*.sh
 
-# 修复 menu.sh 中的问题（关键步骤！）
+# 修复 menu.sh 中的路径问题（关键修复）
+echo -e "${YELLOW}修复脚本路径问题...${NC}"
 sed -i 's|source ~/pinkshell/lib/termux_utils.sh|source $HOME/pinkshell/lib/termux_utils.sh|' ~/pinkshell/bin/menu.sh
 sed -i 's|~/pinkshell/tools_installed|$HOME/pinkshell/tools_installed|g' ~/pinkshell/bin/menu.sh
 sed -i 's|~/pinkshell/bin/menu.sh|$HOME/pinkshell/bin/menu.sh|g' ~/pinkshell/bin/menu.sh
+sed -i 's|~/.pinkshell|$HOME/.pinkshell|g' ~/pinkshell/bin/menu.sh
+sed -i 's|~/pinkshell|$HOME/pinkshell|g' ~/pinkshell/bin/tools_install.sh
 
 # 添加环境变量
 echo -e "${YELLOW}更新环境变量...${NC}"
-if ! grep -q "pinkshell/bin" ~/.bashrc; then
-    echo 'export PATH="$PATH:$HOME/pinkshell/bin"' >> ~/.bashrc
-fi
-
-if ! grep -q "termux_utils.sh" ~/.bashrc; then
-    echo 'source $HOME/pinkshell/lib/termux_utils.sh' >> ~/.bashrc
-fi
+grep -q "pinkshell/bin" ~/.bashrc || echo 'export PATH="$PATH:$HOME/pinkshell/bin"' >> ~/.bashrc
+grep -q "termux_utils.sh" ~/.bashrc || echo 'source $HOME/pinkshell/lib/termux_utils.sh' >> ~/.bashrc
 
 # 设置别名
 echo -e "${YELLOW}创建快捷命令...${NC}"
-if ! grep -q "alias 泠" ~/.bashrc; then
-    echo "alias 泠='bash $HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
-fi
-
-if ! grep -q "alias 更新" ~/.bashrc; then
-    echo "alias 更新='pkg update && pkg upgrade'" >> ~/.bashrc
-fi
-
-if ! grep -q "alias 清理" ~/.bashrc; then
-    echo "alias 清理='pkg clean'" >> ~/.bashrc
-fi
-
-if ! grep -q "alias 存储" ~/.bashrc; then
-    echo "alias 存储='df -h'" >> ~/.bashrc
-fi
+grep -q "alias 泠" ~/.bashrc || echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
+grep -q "alias 更新" ~/.bashrc || echo "alias 更新='pkg update && pkg upgrade'" >> ~/.bashrc
+grep -q "alias 清理" ~/.bashrc || echo "alias 清理='pkg clean'" >> ~/.bashrc
+grep -q "alias 存储" ~/.bashrc || echo "alias 存储='df -h'" >> ~/.bashrc
 
 # 显示完成信息
 echo -e "${GREEN}"
