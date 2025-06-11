@@ -1,5 +1,5 @@
 #!/bin/bash
-# 少女终端工具箱安装脚本 - 无配置版
+# 少女终端工具箱安装脚本
 # 项目地址: https://github.com/Alhkxsj/pinkshell
 
 # 颜色定义
@@ -9,7 +9,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;36m'
 NC='\033[0m'
 
-# 显示标题
 echo -e "${PINK}"
 echo "   ██████╗ ██╗   ██╗ ██████╗ ██╗  ██╗"
 echo "  ██╔════╝ ██║   ██║██╔═══██╗██║  ██║"
@@ -27,7 +26,7 @@ if ! command -v curl &> /dev/null; then
     pkg update -y && pkg install -y curl
 fi
 
-# 创建目录结构 (完全匹配您的结构)
+# 创建目录结构
 echo -e "${YELLOW}创建目录结构...${NC}"
 mkdir -p ~/pinkshell/{bin,lib}
 
@@ -35,18 +34,17 @@ mkdir -p ~/pinkshell/{bin,lib}
 echo -e "${YELLOW}下载主程序文件...${NC}"
 base_url="https://raw.githubusercontent.com/Alhkxsj/pinkshell/main"
 
-# 下载函数
 download_file() {
     local path=$1
     local dest=$2
     echo -e "${BLUE}下载: $path${NC}"
-    if ! curl -fsSL -o "$dest" "${base_url}${path}"; then
+    curl -fsSL -o "$dest" "${base_url}${path}" || {
         echo -e "${YELLOW}下载失败: $path, 尝试备用源...${NC}"
         curl -fsSL -o "$dest" "https://cdn.jsdelivr.net/gh/Alhkxsj/pinkshell${path}"
-    fi
+    }
 }
 
-# 下载核心文件 (只下载必要的文件)
+# 下载核心文件
 download_file "/bin/menu.sh" ~/pinkshell/bin/menu.sh
 download_file "/bin/tools_install.sh" ~/pinkshell/bin/tools_install.sh
 download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
@@ -54,6 +52,11 @@ download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
 # 设置权限
 chmod +x ~/pinkshell/bin/*.sh
 chmod +x ~/pinkshell/lib/*.sh
+
+# 修复 menu.sh 中的问题（关键步骤！）
+sed -i 's|source ~/pinkshell/lib/termux_utils.sh|source $HOME/pinkshell/lib/termux_utils.sh|' ~/pinkshell/bin/menu.sh
+sed -i 's|~/pinkshell/tools_installed|$HOME/pinkshell/tools_installed|g' ~/pinkshell/bin/menu.sh
+sed -i 's|~/pinkshell/bin/menu.sh|$HOME/pinkshell/bin/menu.sh|g' ~/pinkshell/bin/menu.sh
 
 # 添加环境变量
 echo -e "${YELLOW}更新环境变量...${NC}"
@@ -68,7 +71,7 @@ fi
 # 设置别名
 echo -e "${YELLOW}创建快捷命令...${NC}"
 if ! grep -q "alias 泠" ~/.bashrc; then
-    echo "alias 泠='bash ~/pinkshell/bin/menu.sh'" >> ~/.bashrc
+    echo "alias 泠='bash $HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
 fi
 
 if ! grep -q "alias 更新" ~/.bashrc; then
