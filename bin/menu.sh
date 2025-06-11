@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# [快手啊泠好困想睡觉]专属Termux工具箱 v3.5
+# [快手啊泠好困想睡觉]专属Termux工具箱 v4.0
 
 # 加载配置
 if [ -f ~/.pinkshell/.config/config.conf ]; then
@@ -20,7 +20,7 @@ NC='\033[0m'
 
 # 检查依赖
 check_dependencies() {
-  # 新增：检查工具安装标记
+  # 检查工具安装标记
   if [ -f $HOME/pinkshell/tools_installed ]; then
     return
   fi
@@ -39,7 +39,7 @@ check_dependencies() {
     fi
   done
 
-  # 新增：运行工具安装器
+  # 运行工具安装器
   echo -e "${PURPLE}[少女终端] 正在运行工具安装器...${NC}"
   bash $HOME/pinkshell/bin/tools_install.sh
 }
@@ -860,17 +860,19 @@ setup_aliases() {
   read -p "按回车键返回..."
 }
 
-# 自启动设置
+# 自启动设置（关键功能）
 setup_autostart() {
   # 确保脚本可执行
   chmod +x "$0"
 
   # 添加到bashrc以实现启动Termux时运行菜单
   if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-    echo -e "\n# 启动泠泠菜单" >> ~/.bashrc
-    echo "if [ -f \"\$HOME/pinkshell/bin/menu.sh\" ]; then" >> ~/.bashrc
+    echo -e "\n# ===== 少女终端工具箱自启动 ===== #" >> ~/.bashrc
+    echo "if [ -f \"\$HOME/pinkshell/bin/menu.sh\" ] && [ -z \"\$MENU_ALREADY_RUN\" ]; then" >> ~/.bashrc
+    echo "    export MENU_ALREADY_RUN=1" >> ~/.bashrc
     echo "    bash \"\$HOME/pinkshell/bin/menu.sh\"" >> ~/.bashrc
     echo "fi" >> ~/.bashrc
+    echo "# ===== 结束自启动设置 ===== #" >> ~/.bashrc
   fi
 
   # 设置常用别名
@@ -909,6 +911,9 @@ main_menu() {
       0)
         echo -e "${YELLOW}再见！泠泠会想你的~${NC}"
         echo -e "${CYAN}提示: 任何时候输入 '泠' 可重新打开菜单${NC}"
+        
+        # 清理环境变量，恢复普通终端
+        unset MENU_ALREADY_RUN
         exit 0
         ;;
       泠)
@@ -926,15 +931,11 @@ main_menu() {
 check_dependencies
 welcome_banner
 
-# 检查是否设置了别名，如果没有则提示
-if ! grep -q "alias 泠" ~/.bashrc; then
-  echo -e "${YELLOW}首次使用建议设置自启动和别名:${NC}"
-  read -p "是否设置自启动和别名? [y/n] " choice
-  if [[ "$choice" =~ [yY] ]]; then
-    setup_autostart
-    echo -e "${GREEN}设置完成！请执行 'source ~/.bashrc' 或重启Termux${NC}"
-    sleep 2
-  fi
+# 强制设置自启动（无提示询问）
+if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
+  setup_autostart
+  echo -e "${GREEN}自启动已设置！正在加载菜单...${NC}"
+  sleep 2
 fi
 
 # 启动主菜单
