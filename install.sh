@@ -53,7 +53,7 @@ download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
 chmod +x ~/pinkshell/bin/*.sh
 chmod +x ~/pinkshell/lib/*.sh
 
-# 修复 menu.sh 中的路径问题（关键修复）
+# 修复 menu.sh 中的路径问题
 echo -e "${YELLOW}修复脚本路径问题...${NC}"
 sed -i 's|source ~/pinkshell/lib/termux_utils.sh|source $HOME/pinkshell/lib/termux_utils.sh|' ~/pinkshell/bin/menu.sh
 sed -i 's|~/pinkshell/tools_installed|$HOME/pinkshell/tools_installed|g' ~/pinkshell/bin/menu.sh
@@ -73,6 +73,23 @@ grep -q "alias 更新" ~/.bashrc || echo "alias 更新='pkg update && pkg upgrad
 grep -q "alias 清理" ~/.bashrc || echo "alias 清理='pkg clean'" >> ~/.bashrc
 grep -q "alias 存储" ~/.bashrc || echo "alias 存储='df -h'" >> ~/.bashrc
 
+# 设置自启动（关键部分）
+echo -e "${YELLOW}设置自启动功能...${NC}"
+if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
+    cat >> ~/.bashrc << 'EOF'
+
+# ===== 少女终端工具箱自启动 ===== #
+if [ -f "$HOME/pinkshell/bin/menu.sh" ] && [ -z "$MENU_ALREADY_RUN" ]; then
+    export MENU_ALREADY_RUN=1
+    bash "$HOME/pinkshell/bin/menu.sh"
+fi
+# ===== 结束自启动设置 ===== #
+EOF
+    echo -e "${GREEN}自启动设置完成！${NC}"
+else
+    echo -e "${BLUE}自启动已设置，跳过...${NC}"
+fi
+
 # 显示完成信息
 echo -e "${GREEN}"
 echo "██████╗ ██╗   ██╗███████╗"
@@ -85,7 +102,8 @@ echo -e "${NC}"
 
 echo -e "${PINK}[安装完成] 专属工具箱已配置完毕！${NC}"
 echo -e "${BLUE}使用以下命令启动:"
-echo -e "  输入 '泠' 即可启动菜单${NC}"
+echo -e "  输入 '泠' 即可启动菜单"
+echo -e "  重启Termux会自动启动菜单${NC}"
 
 # 首次运行工具安装器
 echo -e "${YELLOW}首次使用需要安装必要工具，请稍候...${NC}"
@@ -95,3 +113,10 @@ bash ~/pinkshell/bin/tools_install.sh
 source ~/.bashrc 2>/dev/null
 
 echo -e "${GREEN}安装完成！请重启Termux或执行: source ~/.bashrc${NC}"
+
+# 首次启动提示
+echo -e "${PINK}首次启动将在5秒后自动开始...${NC}"
+sleep 5
+
+# 首次启动菜单
+bash ~/pinkshell/bin/menu.sh
