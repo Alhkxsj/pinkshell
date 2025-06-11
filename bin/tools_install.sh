@@ -12,9 +12,9 @@ echo -e "\033[1;35m
 echo -e "\033[1;35m[少女终端] 正在准备工具列表...\033[0m"
 
 # 检查是否已安装过
-if [ -f ~/pinkshell_installed ]; then
+if [ -f $HOME/pinkshell/tools_installed ]; then
   echo -e "\033[1;35m[少女终端] 工具已完整安装，跳过本次安装\033[0m"
-  echo -e "\033[1;36m如需重新安装，请删除标记文件: rm ~/pinkshell_installed\033[0m"
+  echo -e "\033[1;36m如需重新安装，请删除标记文件: rm $HOME/pinkshell/tools_installed\033[0m"
   exit 0
 fi
 
@@ -101,5 +101,6 @@ echo -e "█                                     █"
 echo -e "█████████████████████████████████\033[0m"
 
 # 创建安装标记文件
-touch ~/pinkshell_installed
+mkdir -p $HOME/pinkshell
+touch $HOME/pinkshell/tools_installed
 echo -e "\033[1;35m[少女终端] 已创建安装标记文件，下次启动将跳过安装\033[0m"
