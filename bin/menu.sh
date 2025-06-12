@@ -1,10 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# [快手啊泠好困想睡觉]专属Termux工具箱 v4.0
+# [快手啊泠好困想睡觉]专属Termux工具箱 v4.5
 
 # 加载配置
 if [ -f ~/.pinkshell/.config/config.conf ]; then
   source ~/.pinkshell/.config/config.conf
 fi
+
+# 播放列表文件
+PLAYLIST_FILE="$HOME/pinkshell/playlist.txt"
+mkdir -p "$(dirname "$PLAYLIST_FILE")"
+touch "$PLAYLIST_FILE"
 
 # 加载功能库
 source $HOME/pinkshell/lib/termux_utils.sh
@@ -518,6 +523,251 @@ dev_tools() {
   done
 }
 
+# ================== 娱乐功能 (增强版) ================== #
+# 获取循环模式名称
+get_loop_mode_name() {
+  case $1 in
+    0) echo "顺序播放" ;;
+    1) echo "单曲循环" ;;
+    2) echo "列表循环" ;;
+    *) echo "未知模式" ;;
+  esac
+}
+
+# 播放单个音乐文件
+play_music() {
+  local music="$1"
+  if command -v mpv &>/dev/null; then
+    echo -e "${YELLOW}正在播放...${NC}"
+    echo -e "${CYAN}按 'p' 暂停/继续"
+    echo -e "按 's' 停止播放${NC}"
+    
+    # 后台播放音乐
+    mpv --no-video "$music" &
+    local mpv_pid=$!
+    
+    # 监听键盘输入
+    while ps -p $mpv_pid > /dev/null; do
+      read -t 1 -n 1 -r key
+      case $key in
+        p|P) # 暂停/继续
+          pkill -STOP mpv || pkill -CONT mpv
+          ;;
+        s|S) # 停止播放
+          kill $mpv_pid
+          echo -e "${YELLOW}播放已停止${NC}"
+          return
+          ;;
+      esac
+    done
+  else
+    pkg install mpv -y
+    if command -v mpv &>/dev/null; then
+      play_music "$music"
+    else
+      echo -e "${RED}无法安装mpv播放器！${NC}"
+    fi
+  fi
+}
+
+# 在线音乐播放
+play_online_music() {
+  local url="$1"
+  if [ -z "$url" ]; then
+    echo -e "${RED}URL不能为空！${NC}"
+    return
+  fi
+
+  # 添加到播放列表
+  echo "$url" >> "$PLAYLIST_FILE"
+  echo -e "${GREEN}已添加到播放列表！${NC}"
+  
+  # 播放音乐
+  play_music "$url"
+}
+
+# 本地音乐播放
+play_local_music() {
+  echo -e "${YELLOW}正在扫描音乐文件...${NC}"
+  local file_list=()
+  while IFS= read -r -d $'\0' file; do
+    file_list+=("$file")
+  done < <(find ~/ -type f \( -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.flac" \) -print0 2>/dev/null)
+  
+  if [ ${#file_list[@]} -eq 0 ]; then
+    echo -e "${RED}未找到音乐文件！${NC}"
+    return
+  fi
+  
+  # 显示文件列表
+  for i in "${!file_list[@]}"; do
+    echo "$((i+1)). ${file_list[$i]}"
+  done | lolcat
+  
+  read -p "请输入文件编号: " file_num
+  local real_index=$((file_num-1))
+  
+  if [ $real_index -ge 0 ] && [ $real_index -lt ${#file_list[@]} ]; then
+    local music_file="${file_list[$real_index]}"
+    # 添加到播放列表
+    echo "$music_file" >> "$PLAYLIST_FILE"
+    echo -e "${GREEN}已添加到播放列表！${NC}"
+    play_music "$music_file"
+  else
+    echo -e "${RED}无效选择！${NC}"
+  fi
+}
+
+# 播放整个播放列表
+play_playlist() {
+  if [ ! -f "$PLAYLIST_FILE" ] || [ ! -s "$PLAYLIST_FILE" ]; then
+    echo -e "${RED}播放列表为空！${NC}"
+    return
+  fi
+  
+  # 读取播放列表到数组
+  mapfile -t playlist < "$PLAYLIST_FILE"
+  local current_index=0
+  local loop_mode=2  # 0: 顺序播放, 1: 单曲循环, 2: 列表循环
+  
+  while [ $current_index -lt ${#playlist[@]} ]; do
+    local music="${playlist[$current_index]}"
+    
+    # 播放当前音乐
+    clear
+    welcome_banner
+    echo -e "${PURPLE}正在播放: $(basename "$music")${NC}"
+    echo -e "${CYAN}进度: $((current_index+1))/${#playlist[@]}${NC}"
+    echo -e "${YELLOW}循环模式: $(get_loop_mode_name $loop_mode)${NC}"
+    
+    # 后台播放音乐
+    if command -v mpv &>/dev/null; then
+      mpv --no-video "$music" &
+    else
+      echo -e "${RED}未找到mpv播放器！${NC}"
+      return
+    fi
+    local mpv_pid=$!
+    
+    # 显示控制菜单
+    while ps -p $mpv_pid > /dev/null; do
+      echo -e "\n${BLUE}======= 播放控制 =======${NC}"
+      echo -e "1. 暂停/继续"
+      echo -e "2. 下一首"
+      echo -e "3. 上一首"
+      echo -e "4. 切换循环模式"
+      echo -e "5. 停止播放"
+      echo -e "${BLUE}=======================${NC}"
+      
+      read -t 1 -n 1 -r control
+      if [ -n "$control" ]; then
+        case $control in
+          1) # 暂停/继续
+            pkill -STOP mpv || pkill -CONT mpv
+            ;;
+          2) # 下一首
+            kill $mpv_pid
+            current_index=$((current_index+1))
+            [ $current_index -ge ${#playlist[@]} ] && current_index=0
+            break
+            ;;
+          3) # 上一首
+            kill $mpv_pid
+            current_index=$((current_index-1))
+            [ $current_index -lt 0 ] && current_index=$((${#playlist[@]}-1))
+            break
+            ;;
+          4) # 切换循环模式
+            loop_mode=$(( (loop_mode + 1) % 3 ))
+            echo -e "\n${GREEN}循环模式已切换为: $(get_loop_mode_name $loop_mode)${NC}"
+            ;;
+          5) # 停止播放
+            kill $mpv_pid
+            echo -e "${YELLOW}播放已停止${NC}"
+            return
+            ;;
+        esac
+      fi
+    done
+    
+    # 等待音乐播放结束
+    wait $mpv_pid 2>/dev/null
+    
+    # 根据循环模式更新索引
+    case $loop_mode in
+      0) # 顺序播放
+        current_index=$((current_index+1))
+        ;;
+      1) # 单曲循环
+        # 保持当前索引不变
+        ;;
+      2) # 列表循环
+        current_index=$(( (current_index+1) % ${#playlist[@]} ))
+        ;;
+    esac
+  done
+}
+
+# 播放列表管理
+manage_playlist() {
+  while true; do
+    welcome_banner
+    echo -e "${BLUE}========== 播放列表管理 ==========${NC}"
+    
+    # 显示当前播放列表
+    echo -e "${GREEN}当前播放列表:${NC}"
+    if [ -f "$PLAYLIST_FILE" ] && [ -s "$PLAYLIST_FILE" ]; then
+      nl -w 2 -s '. ' "$PLAYLIST_FILE" | lolcat
+    else
+      echo -e "${YELLOW}播放列表为空${NC}"
+    fi
+    
+    echo -e "\n1. 播放整个列表"
+    echo -e "2. 清空播放列表"
+    echo -e "3. 删除指定歌曲"
+    echo -e "0. 返回"
+    echo -e "${BLUE}=================================${NC}"
+    
+    read -p "请选择: " choice
+    case $choice in
+      1)
+        if [ -f "$PLAYLIST_FILE" ] && [ -s "$PLAYLIST_FILE" ]; then
+          play_playlist
+        else
+          echo -e "${RED}播放列表为空！${NC}"
+          sleep 1
+        fi
+        ;;
+      2)
+        > "$PLAYLIST_FILE"
+        echo -e "${GREEN}播放列表已清空！${NC}"
+        sleep 1
+        ;;
+      3)
+        if [ -f "$PLAYLIST_FILE" ] && [ -s "$PLAYLIST_FILE" ]; then
+          read -p "请输入要删除的歌曲编号: " song_num
+          if [[ "$song_num" =~ ^[0-9]+$ ]] && [ "$song_num" -gt 0 ] && [ "$song_num" -le $(wc -l < "$PLAYLIST_FILE") ]; then
+            sed -i "${song_num}d" "$PLAYLIST_FILE"
+            echo -e "${GREEN}已删除第 ${song_num} 首歌曲！${NC}"
+          else
+            echo -e "${RED}无效的歌曲编号！${NC}"
+          fi
+        else
+          echo -e "${RED}播放列表为空！${NC}"
+        fi
+        sleep 1
+        ;;
+      0)
+        return
+        ;;
+      *)
+        echo -e "${RED}无效输入！${NC}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
 # 娱乐功能菜单
 fun_tools() {
   while true; do
@@ -563,6 +813,7 @@ fun_tools() {
         echo -e "${PURPLE}音乐播放器${NC}"
         echo -e "1. 在线播放"
         echo -e "2. 本地播放"
+        echo -e "3. 播放列表管理"
         read -p "请选择: " music_choice
 
         case $music_choice in
@@ -573,36 +824,18 @@ fun_tools() {
               sleep 1
               continue
             fi
-
-            if command -v mpv &>/dev/null; then
-              echo -e "${YELLOW}正在播放音乐...${NC}"
-              mpv "$music_url"
-            else
-              pkg install mpv -y
-              echo -e "${YELLOW}正在播放音乐...${NC}"
-              mpv "$music_url"
-            fi
+            play_online_music "$music_url"
             ;;
           2)
-            echo -e "${YELLOW}正在扫描音乐文件...${NC}"
-            find ~/ -type f \( -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.flac" \) 2>/dev/null | nl | lolcat
-            read -p "请输入文件编号: " file_num
-            music_file=$(find ~/ -type f \( -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.flac" \) 2>/dev/null | sed -n "${file_num}p")
-
-            if [ -z "$music_file" ]; then
-              echo -e "${RED}无效选择！${NC}"
-              sleep 1
-              continue
-            fi
-
-            echo -e "${YELLOW}正在播放音乐...${NC}"
-            mpv "$music_file"
+            play_local_music
+            ;;
+          3)
+            manage_playlist
             ;;
           *)
             echo -e "${RED}无效选择！${NC}"
             ;;
         esac
-        read -p "按回车键返回..."
         ;;
       3)
         echo -e "${PURPLE}视频播放器${NC}"
@@ -908,35 +1141,3 @@ main_menu() {
       3) dev_tools ;;
       4) fun_tools ;;
       5) personal_settings ;;
-      0)
-        echo -e "${YELLOW}再见！泠泠会想你的~${NC}"
-        echo -e "${CYAN}提示: 任何时候输入 '泠' 可重新打开菜单${NC}"
-        
-        # 清理环境变量，恢复普通终端
-        unset MENU_ALREADY_RUN
-        exit 0
-        ;;
-      泠)
-        show_easter_egg
-        ;;
-      *)
-        echo -e "${RED}无效输入！${NC}"
-        sleep 1
-        ;;
-    esac
-  done
-}
-
-# 初始化
-check_dependencies
-welcome_banner
-
-# 强制设置自启动（无提示询问）
-if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-  setup_autostart
-  echo -e "${GREEN}自启动已设置！正在加载菜单...${NC}"
-  sleep 2
-fi
-
-# 启动主菜单
-main_menu
