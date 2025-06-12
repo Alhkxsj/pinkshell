@@ -1141,3 +1141,35 @@ main_menu() {
       3) dev_tools ;;
       4) fun_tools ;;
       5) personal_settings ;;
+      0)
+        echo -e "${YELLOW}再见！泠泠会想你的~${NC}"
+        echo -e "${CYAN}提示: 任何时候输入 '泠' 可重新打开菜单${NC}"
+        
+        # 清理环境变量，恢复普通终端
+        unset MENU_ALREADY_RUN
+        exit 0
+        ;;
+      泠)
+        show_easter_egg
+        ;;
+      *)
+        echo -e "${RED}无效输入！${NC}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+# 初始化
+check_dependencies
+welcome_banner
+
+# 强制设置自启动（无提示询问）
+if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
+  setup_autostart
+  echo -e "${GREEN}自启动已设置！正在加载菜单...${NC}"
+  sleep 2
+fi
+
+# 启动主菜单
+main_menu
