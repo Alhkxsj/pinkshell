@@ -1,6 +1,5 @@
 #!/bin/bash
-# 少女终端工具箱安装脚本
-# 项目地址: https://github.com/Alhkxsj/pinkshell
+# Pinkshell Installer by Alhkxsj
 
 # 颜色定义
 PINK='\033[1;35m'
@@ -9,6 +8,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;36m'
 NC='\033[0m'
 
+clear
 echo -e "${PINK}"
 echo "   ██████╗ ██╗   ██╗ ██████╗ ██╗  ██╗"
 echo "  ██╔════╝ ██║   ██║██╔═══██╗██║  ██║"
@@ -17,106 +17,94 @@ echo "  ██║   ██║██║   ██║██║   ██║██╔
 echo "  ╚██████╔╝╚██████╔╝╚██████╔╝██║  ██║"
 echo "   ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝"
 echo -e "${NC}"
-echo -e "${PINK}[少女终端] 安装程序启动...${NC}"
+echo -e "${PINK}[Pinkshell] Installer Starting...${NC}"
 
 # 检查依赖项
-echo -e "${YELLOW}检查必要依赖...${NC}"
-if ! command -v curl &> /dev/null; then
-    echo -e "${YELLOW}安装 curl...${NC}"
+echo -e "${YELLOW}Checking dependencies...${NC}"
+command -v curl &>/dev/null || {
+    echo -e "${YELLOW}Installing curl...${NC}"
     pkg update -y && pkg install -y curl
-fi
+}
 
-# 创建目录结构
-echo -e "${YELLOW}创建目录结构...${NC}"
-mkdir -p ~/pinkshell/{bin,lib}
+# 创建目录
+mkdir -p "$HOME/pinkshell/bin" "$HOME/pinkshell/lib"
 
-# 下载必要文件
-echo -e "${YELLOW}下载主程序文件...${NC}"
+# 下载文件
+echo -e "${YELLOW}Downloading main scripts...${NC}"
 base_url="https://raw.githubusercontent.com/Alhkxsj/pinkshell/main"
 
 download_file() {
     local path=$1
     local dest=$2
-    echo -e "${BLUE}下载: $path${NC}"
+    echo -e "${BLUE}Downloading: $path${NC}"
     curl -fsSL -o "$dest" "${base_url}${path}" || {
-        echo -e "${YELLOW}下载失败: $path, 尝试备用源...${NC}"
+        echo -e "${YELLOW}Failed, trying backup...${NC}"
         curl -fsSL -o "$dest" "https://cdn.jsdelivr.net/gh/Alhkxsj/pinkshell${path}"
     }
 }
 
-# 下载核心文件
-download_file "/bin/menu.sh" ~/pinkshell/bin/menu.sh
-download_file "/bin/tools_install.sh" ~/pinkshell/bin/tools_install.sh
-download_file "/lib/termux_utils.sh" ~/pinkshell/lib/termux_utils.sh
+download_file "/bin/menu.sh" "$HOME/pinkshell/bin/menu.sh"
+download_file "/bin/tools_install.sh" "$HOME/pinkshell/bin/tools_install.sh"
+download_file "/lib/termux_utils.sh" "$HOME/pinkshell/lib/termux_utils.sh"
 
-# 设置权限
-chmod +x ~/pinkshell/bin/*.sh
-chmod +x ~/pinkshell/lib/*.sh
+chmod +x "$HOME/pinkshell/bin"/*.sh "$HOME/pinkshell/lib"/*.sh
 
-# 修复 menu.sh 中的路径问题
-echo -e "${YELLOW}修复脚本路径问题...${NC}"
-sed -i 's|source ~/pinkshell/lib/termux_utils.sh|source $HOME/pinkshell/lib/termux_utils.sh|' ~/pinkshell/bin/menu.sh
-sed -i 's|~/pinkshell/tools_installed|$HOME/pinkshell/tools_installed|g' ~/pinkshell/bin/menu.sh
-sed -i 's|~/pinkshell/bin/menu.sh|$HOME/pinkshell/bin/menu.sh|g' ~/pinkshell/bin/menu.sh
-sed -i 's|~/.pinkshell|$HOME/.pinkshell|g' ~/pinkshell/bin/menu.sh
-sed -i 's|~/pinkshell|$HOME/pinkshell|g' ~/pinkshell/bin/tools_install.sh
+# 修复路径
+sed -i 's|~|$HOME|g' "$HOME/pinkshell/bin/menu.sh"
+sed -i 's|~|$HOME|g' "$HOME/pinkshell/bin/tools_install.sh"
 
-# 添加环境变量
-echo -e "${YELLOW}更新环境变量...${NC}"
-grep -q "pinkshell/bin" ~/.bashrc || echo 'export PATH="$PATH:$HOME/pinkshell/bin"' >> ~/.bashrc
-grep -q "termux_utils.sh" ~/.bashrc || echo 'source $HOME/pinkshell/lib/termux_utils.sh' >> ~/.bashrc
+# 自动写入配置
+add_to_shellrc() {
+    local file="$1"
+    grep -q 'pinkshell' "$file" && return
+    echo -e "${YELLOW}Updating $file...${NC}"
+    cat >> "$file" << 'EOF'
 
-# 设置别名
-echo -e "${YELLOW}创建快捷命令...${NC}"
-grep -q "alias 泠" ~/.bashrc || echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
-grep -q "alias 更新" ~/.bashrc || echo "alias 更新='pkg update && pkg upgrade'" >> ~/.bashrc
-grep -q "alias 清理" ~/.bashrc || echo "alias 清理='pkg clean'" >> ~/.bashrc
-grep -q "alias 存储" ~/.bashrc || echo "alias 存储='df -h'" >> ~/.bashrc
+# ===== Pinkshell Environment =====
+export PATH="$PATH:$HOME/pinkshell/bin"
+[ -f "$HOME/pinkshell/lib/termux_utils.sh" ] && source "$HOME/pinkshell/lib/termux_utils.sh"
+alias 泠='bash $HOME/pinkshell/bin/menu.sh'
+alias 更新='pkg update && pkg upgrade -y'
+alias 清理='pkg clean'
+alias 存储='df -h'
 
-# 设置自启动（关键部分）
-echo -e "${YELLOW}设置自启动功能...${NC}"
-if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-    cat >> ~/.bashrc << 'EOF'
-
-# ===== 少女终端工具箱自启动 ===== #
+# Auto start menu if not already run
 if [ -f "$HOME/pinkshell/bin/menu.sh" ] && [ -z "$MENU_ALREADY_RUN" ]; then
-    export MENU_ALREADY_RUN=1
-    bash "$HOME/pinkshell/bin/menu.sh"
+  export MENU_ALREADY_RUN=1
+  bash "$HOME/pinkshell/bin/menu.sh"
 fi
-# ===== 结束自启动设置 ===== #
+# ===== End Pinkshell Config =====
+
 EOF
-    echo -e "${GREEN}自启动设置完成！${NC}"
-else
-    echo -e "${BLUE}自启动已设置，跳过...${NC}"
-fi
+}
 
-# 显示完成信息
-echo -e "${GREEN}"
-echo "██████╗ ██╗   ██╗███████╗"
-echo " ██╔═══██╗██║   ██║██╔════╝"
-echo " ██║   ██║██║   ██║█████╗  "
-echo " ██║▄▄ ██║██║   ██║██╔══╝  "
-echo " ╚██████╔╝╚██████╔╝███████╗"
-echo "  ╚══▀▀═╝  ╚═════╝ ╚══════╝"
-echo -e "${NC}"
-
-echo -e "${PINK}[安装完成] 专属工具箱已配置完毕！${NC}"
-echo -e "${BLUE}使用以下命令启动:"
-echo -e "  输入 '泠' 即可启动菜单"
-echo -e "  重启Termux会自动启动菜单${NC}"
-
-# 首次运行工具安装器
-echo -e "${YELLOW}首次使用需要安装必要工具，请稍候...${NC}"
-bash ~/pinkshell/bin/tools_install.sh
+add_to_shellrc "$HOME/.bashrc"
+add_to_shellrc "$HOME/.zshrc"
 
 # 应用环境变量
-source ~/.bashrc 2>/dev/null
+echo -e "${YELLOW}Applying environment changes...${NC}"
+source "$HOME/.bashrc" 2>/dev/null || true
+source "$HOME/.zshrc" 2>/dev/null || true
 
-echo -e "${GREEN}安装完成！请重启Termux或执行: source ~/.bashrc${NC}"
+# 安装提示
+echo -e "${GREEN}"
+echo "██████╗ ██╗   ██╗███████╗"
+echo "██╔═══██╗██║   ██║██╔════╝"
+echo "██║   ██║██║   ██║█████╗  "
+echo "██║▄▄ ██║██║   ██║██╔══╝  "
+echo "╚██████╔╝╚██████╔╝███████╗"
+echo " ╚══▀▀═╝  ╚═════╝ ╚══════╝"
+echo -e "${NC}"
 
-# 首次启动提示
-echo -e "${PINK}首次启动将在5秒后自动开始...${NC}"
+echo -e "${PINK}[✓] Installed successfully!${NC}"
+echo -e "${BLUE}To launch, type: 泠"
+echo -e "Menu will auto-start next time you open Termux${NC}"
+
+# 首次启动工具安装器
+echo -e "${YELLOW}Installing required tools...${NC}"
+bash "$HOME/pinkshell/bin/tools_install.sh"
+
+# 延迟首次启动
+echo -e "${PINK}Launching menu in 5 seconds...${NC}"
 sleep 5
-
-# 首次启动菜单
-bash ~/pinkshell/bin/menu.sh
+bash "$HOME/pinkshell/bin/menu.sh"
