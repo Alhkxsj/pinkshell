@@ -2,17 +2,14 @@
 # [快手啊泠好困想睡觉]专属Termux工具箱 v4.5
 
 # 加载配置
-if [ -f ~/.pinkshell/.config/config.conf ]; then
-  source ~/.pinkshell/.config/config.conf
+if [ -f $HOME/.pinkshell/.config/config.conf ]; then
+  source $HOME/.pinkshell/.config/config.conf
 fi
 
 # 播放列表文件
 PLAYLIST_FILE="$HOME/pinkshell/playlist.txt"
 mkdir -p "$(dirname "$PLAYLIST_FILE")"
 touch "$PLAYLIST_FILE"
-
-# 加载功能库
-source $HOME/pinkshell/lib/termux_utils.sh
 
 # 颜色定义
 RED='\033[1;31m'
@@ -110,6 +107,66 @@ show_easter_egg() {
   sleep 4
 }
 
+# 进程管理
+process_manager() {
+  while true; do
+    welcome_banner
+    echo -e "${BLUE}========== 进程管理 ==========${NC}"
+    echo -e "1. 查看所有进程"
+    echo -e "2. 查找进程"
+    echo -e "3. 结束进程"
+    echo -e "0. 返回\n"
+    echo -e "${BLUE}==============================${NC}"
+
+    read -p "请输入选项 : " choice
+    case $choice in
+      1)
+        echo -e "${GREEN}所有进程:${NC}"
+        ps -ef | lolcat
+        read -p "按回车键返回..."
+        ;;
+      2)
+        read -p "请输入进程名: " process_name
+        if [ -z "$process_name" ]; then
+          echo -e "${RED}进程名不能为空！${NC}"
+          sleep 1
+          continue
+        fi
+        echo -e "${GREEN}查找结果:${NC}"
+        ps -ef | grep "$process_name" | grep -v grep | lolcat
+        read -p "按回车键返回..."
+        ;;
+      3)
+        read -p "请输入进程PID: " pid
+        if ! [[ "$pid" =~ ^[0-9]+$ ]]; then
+          echo -e "${RED}无效的PID！${NC}"
+          sleep 1
+          continue
+        fi
+        kill -9 $pid
+        echo -e "${GREEN}已结束进程 $pid${NC}"
+        sleep 1
+        ;;
+      0)
+        return
+        ;;
+      *)
+        echo -e "${RED}无效输入！${NC}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+# 磁盘分析
+disk_analysis() {
+  echo -e "${CYAN}文件系统使用情况:${NC}"
+  df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+  echo -e "\n${CYAN}目录大小排行:${NC}"
+  du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+  read -p "按回车键返回..."
+}
+
 # 系统工具菜单
 system_tools() {
   while true; do
@@ -138,11 +195,10 @@ system_tools() {
         ;;
       2)
         echo -e "${GREEN}存储空间分析:${NC}"
-        # 显示更详细的存储信息
         echo -e "${CYAN}文件系统使用情况:${NC}"
         df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
         echo -e "\n${CYAN}目录大小排行:${NC}"
-        du -h -d 1 ~/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+        du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
         read -p "按回车键返回..."
         ;;
       3)
@@ -592,7 +648,7 @@ play_local_music() {
   local file_list=()
   while IFS= read -r -d $'\0' file; do
     file_list+=("$file")
-  done < <(find ~/ -type f \( -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.flac" \) -print0 2>/dev/null)
+  done < <(find $HOME/ -type f \( -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.flac" \) -print0 2>/dev/null)
   
   if [ ${#file_list[@]} -eq 0 ]; then
     echo -e "${RED}未找到音乐文件！${NC}"
@@ -1007,8 +1063,8 @@ personal_settings() {
         sleep 1
         ;;
       3)
-        if [ ! -d ~/.pinkshell/.config ]; then
-          mkdir -p ~/.pinkshell/.config
+        if [ ! -d $HOME/.pinkshell/.config ]; then
+          mkdir -p $HOME/.pinkshell/.config
         fi
         
         echo -e "${GREEN}编辑配置文件...${NC}"
@@ -1018,11 +1074,11 @@ personal_settings() {
         
         case $config_choice in
           1)
-            nano ~/.pinkshell/.config/config.conf
+            nano $HOME/.pinkshell/.config/config.conf
             echo -e "${GREEN}主配置已保存${NC}"
             ;;
           2)
-            nano ~/pinkshell/bin/menu.sh
+            nano $HOME/pinkshell/bin/menu.sh
             echo -e "${GREEN}工具箱配置已保存${NC}"
             ;;
           *)
@@ -1035,15 +1091,15 @@ personal_settings() {
       4)
         echo -e "${PURPLE}正在设置泠泠专属提示符...${NC}"
         # 设置专属提示符
-        if grep -q "泠泠专属提示符" ~/.bashrc; then
-          sed -i '/泠泠专属提示符/d' ~/.bashrc
+        if grep -q "泠泠专属提示符" $HOME/.bashrc; then
+          sed -i '/泠泠专属提示符/d' $HOME/.bashrc
         fi
         
-        echo -e "\n# 泠泠专属提示符" >> ~/.bashrc
-        echo "PS1='\[\e[1;35m\]泠泠\[\e[0m\]@\[\e[1;36m\]\h \[\e[1;33m\]\w \[\e[1;35m\]❯\[\e[0m\] '" >> ~/.bashrc
+        echo -e "\n# 泠泠专属提示符" >> $HOME/.bashrc
+        echo "PS1='\[\e[1;35m\]泠泠\[\e[0m\]@\[\e[1;36m\]\h \[\e[1;33m\]\w \[\e[1;35m\]❯\[\e[0m\] '" >> $HOME/.bashrc
         
         echo -e "${GREEN}专属提示符已设置！重启后生效${NC}"
-        echo -e "${YELLOW}提示: 输入 'source ~/.bashrc' 立即生效${NC}"
+        echo -e "${YELLOW}提示: 输入 'source $HOME/.bashrc' 立即生效${NC}"
         sleep 2
         ;;
       5)
@@ -1065,21 +1121,21 @@ personal_settings() {
 # 设置别名
 setup_aliases() {
   # 设置别名，以便在命令行输入"泠"启动菜单
-  if ! grep -q "alias 泠" ~/.bashrc; then
-    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> ~/.bashrc
+  if ! grep -q "alias 泠" $HOME/.bashrc; then
+    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> $HOME/.bashrc
   fi
 
   # 添加其他实用别名
-  if ! grep -q "alias 更新" ~/.bashrc; then
-    echo "alias 更新='pkg update && pkg upgrade'" >> ~/.bashrc
+  if ! grep -q "alias 更新" $HOME/.bashrc; then
+    echo "alias 更新='pkg update && pkg upgrade'" >> $HOME/.bashrc
   fi
 
-  if ! grep -q "alias 清理" ~/.bashrc; then
-    echo "alias 清理='pkg clean'" >> ~/.bashrc
+  if ! grep -q "alias 清理" $HOME/.bashrc; then
+    echo "alias 清理='pkg clean'" >> $HOME/.bashrc
   fi
 
-  if ! grep -q "alias 存储" ~/.bashrc; then
-    echo "alias 存储='df -h'" >> ~/.bashrc
+  if ! grep -q "alias 存储" $HOME/.bashrc; then
+    echo "alias 存储='df -h'" >> $HOME/.bashrc
   fi
 
   echo -e "${GREEN}别名已设置！${NC}"
@@ -1089,34 +1145,21 @@ setup_aliases() {
   echo -e "  清理  - 清理缓存"
   echo -e "  存储  - 查看存储空间"
   echo -e "${CYAN}执行以下命令立即生效:${NC}"
-  echo -e "source ~/.bashrc"
+  echo -e "source $HOME/.bashrc"
   read -p "按回车键返回..."
 }
 
-# 自启动设置（关键功能）
+# 自启动设置
 setup_autostart() {
   # 确保脚本可执行
   chmod +x "$0"
 
-  # 添加到bashrc以实现启动Termux时运行菜单
-  if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-    echo -e "\n# ===== 少女终端工具箱自启动 ===== #" >> ~/.bashrc
-    echo "if [ -f \"\$HOME/pinkshell/bin/menu.sh\" ] && [ -z \"\$MENU_ALREADY_RUN\" ]; then" >> ~/.bashrc
-    echo "    export MENU_ALREADY_RUN=1" >> ~/.bashrc
-    echo "    bash \"\$HOME/pinkshell/bin/menu.sh\"" >> ~/.bashrc
-    echo "fi" >> ~/.bashrc
-    echo "# ===== 结束自启动设置 ===== #" >> ~/.bashrc
-  fi
-
-  # 设置常用别名
+  # 设置别名
   setup_aliases
 
   # 提示
   echo -e "${GREEN}自启动和别名已设置！${NC}"
-  echo -e "${YELLOW}1. 重启Termux后会自动启动菜单${NC}"
-  echo -e "${YELLOW}2. 任何时候在终端输入 '泠' 可打开菜单${NC}"
-  echo -e "${CYAN}执行以下命令立即生效:${NC}"
-  echo -e "source ~/.bashrc"
+  echo -e "${YELLOW}现在您可以在终端输入 '泠' 来打开菜单${NC}"
 }
 
 # 主菜单
@@ -1135,6 +1178,13 @@ main_menu() {
     echo -e "${GREEN}提示: 退出后输入'泠'可重新打开菜单${NC}"
 
     read -p "请输入选项 : " choice
+    
+    # 彩蛋触发
+    if [ "$choice" = "泠" ]; then
+      show_easter_egg
+      continue
+    fi
+    
     case $choice in
       1) system_tools ;;
       2) network_tools ;;
@@ -1142,15 +1192,8 @@ main_menu() {
       4) fun_tools ;;
       5) personal_settings ;;
       0)
-        echo -e "${YELLOW}再见！泠泠会想你的~${NC}"
-        echo -e "${CYAN}提示: 任何时候输入 '泠' 可重新打开菜单${NC}"
-        
-        # 清理环境变量，恢复普通终端
-        unset MENU_ALREADY_RUN
+        echo -e "${GREEN}感谢使用！再见！${NC}"
         exit 0
-        ;;
-      泠)
-        show_easter_egg
         ;;
       *)
         echo -e "${RED}无效输入！${NC}"
@@ -1160,16 +1203,6 @@ main_menu() {
   done
 }
 
-# 初始化
+# 启动脚本
 check_dependencies
-welcome_banner
-
-# 强制设置自启动（无提示询问）
-if ! grep -q "pinkshell/bin/menu.sh" ~/.bashrc; then
-  setup_autostart
-  echo -e "${GREEN}自启动已设置！正在加载菜单...${NC}"
-  sleep 2
-fi
-
-# 启动主菜单
 main_menu
