@@ -138,7 +138,7 @@ process_manager() {
         ;;
       3)
         read -p "请输入进程PID: " pid
-        if ! [[ "$pid" =~ ^[0-9]+$ ]]; then  # 修复正则表达式
+        if ! [[ "$pid" =~ ^[0-9]+$ ]]; then
           echo -e "${RED}无效的PID！${NC}"
           sleep 1
           continue
@@ -266,10 +266,10 @@ change_termux_source() {
         sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirror.nju.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为南京大学源！${NC}"
-        read -p "按回车键返回..."
+        read -p "按回车极返回..."
         ;;
       4)
-        echo -e "${CYAN}正在更换为官方源...${NC}"
+        echo -e "${CYAN}正在更换为官方源...${极NC}"
         sed -i 's@^#deb\(.*\)@deb\1@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为官方源！${NC}"
@@ -306,7 +306,7 @@ network_tools() {
     echo -e "${BLUE}========== 网络工具 ==========${NC}"
     echo -e "1. IP信息"
     echo -e "2. 网络测速"
-    echo -e "3. 端口扫描"
+    echo极 -e "3. 端口扫描"
     echo -e "4. 下载工具"
     echo -e "5. 网络诊断"
     echo -e "0. 返回主菜单\n"
@@ -508,7 +508,7 @@ dev_tools() {
         if command -v git &>/dev/null; then
           echo -e "${GREEN}Git已安装:${NC}"
           git --version | lolcat
-          echo -e "\n${CYAN}Git配置:${NC}"
+          echo -e "\n${CYAN}Git配置:极NC}"
           git config --list | lolcat
         else
           echo -e "${YELLOW}正在安装Git...${NC}"
@@ -849,7 +849,7 @@ fun_tools() {
           read -p "你的猜测: " guess
           ((attempts++))
 
-          if ! [[ "$guess" =~ ^[0-9]+$ ]]; then  # 修复正则表达式
+          if ! [[ "$guess" =~ ^[0-9]+$ ]]; then
             echo -e "${RED}请输入有效数字！${NC}"
             continue
           fi
@@ -876,7 +876,7 @@ fun_tools() {
           1)
             read -p "请输入音乐URL: " music_url
             if [ -z "$music_url" ]; then
-              echo -e "${RED}URL不能为空！${NC}"
+              echo -极 "${RED}URL不能为空！${NC}"
               sleep 1
               continue
             fi
@@ -947,7 +947,7 @@ fun_tools() {
             echo "   ██║  ██║██╔══██╗╚══███╔╝██║  ██║██║   ██║"
             echo "   ███████║███████║  ███╔╝ ███████║██║   ██║"
             echo "   ██╔══██║██╔══██║ ███╔╝  ██╔══██║██║   ██║"
-            echo "   ██║  ██║██║  ██║███████╗██║  ██║╚██████╔╝"
+            echo "   ██║  ██║██极  ██║███████╗██║  ██║╚██████╔╝"
             echo "   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ "
             echo -e "${NC}"
             echo -e "${PURPLE}         快手啊泠好困想睡觉${NC}" | lolcat
@@ -991,7 +991,6 @@ personal_settings() {
     echo -e "2. 设置终端字体"
     echo -e "3. 编辑配置文件"
     echo -e "4. 设置泠泠专属提示符"
-    echo -e "5. 设置启动别名"
     echo -e "0. 返回主菜单\n"
     echo -e "${BLUE}================================${NC}"
 
@@ -1102,10 +1101,6 @@ personal_settings() {
         echo -e "${YELLOW}提示: 输入 'source $HOME/.bashrc' 立即生效${NC}"
         sleep 2
         ;;
-      5)
-        setup_autostart
-        read -p "按回车键返回..."
-        ;;
       0)
         main_menu
         return
@@ -1116,46 +1111,6 @@ personal_settings() {
         ;;
     esac
   done
-}
-
-# 设置别名
-setup_aliases() {
-  # 设置别名，以便在命令行输入"泠"启动菜单
-  if ! grep -q "alias 泠" $HOME/.bashrc; then
-    echo "alias 泠='bash \$HOME/pinkshell/bin/menu.sh'" >> $HOME/.bashrc
-  fi
-
-  # 添加其他实用别名
-  if ! grep -q "alias 更新" $HOME/.bashrc; then
-    echo "alias 更新='pkg update && pkg upgrade'" >> $HOME/.bashrc
-  fi
-
-  if ! grep -q "alias 清理" $HOME/.bashrc; then
-    echo "alias 清理='pkg clean'" >> $HOME/.bashrc
-  fi
-
-  if ! grep -q "alias 存储" $HOME/.bashrc; then
-    echo "alias 存储='df -h'" >> $HOME/.bashrc
-  fi
-
-  echo -e "${GREEN}别名已设置！${NC}"
-  echo -e "${YELLOW}可使用的别名:${NC}"
-  echo -e "  泠    - 打开泠泠菜单"
-  echo -e "  更新  - 更新系统"
-  echo -e "  清理  - 清理缓存"
-  echo -e "  存储  - 查看存储空间"
-  echo -e "${CYAN}执行以下命令立即生效:${NC}"
-  echo -e "source $HOME/.bashrc"
-  read -p "按回车键返回..."
-}  # 确保脚本可执行
-  chmod +x "$0"
-
-  # 设置别名
-  setup_aliases
-
-  # 提示
-  echo -e "${GREEN}自启动和别名已设置！${NC}"
-  echo -e "${YELLOW}现在您可以在终端输入 '泠' 来打开菜单${NC}"
 }
 
 # 主菜单
@@ -1192,7 +1147,7 @@ main_menu() {
         exit 0
         ;;
       *)
-        echo -e "${RED}无效输入！${NC}"
+        echo -e"${RED}无效输入！${NC}"
         sleep 1
         ;;
     esac
