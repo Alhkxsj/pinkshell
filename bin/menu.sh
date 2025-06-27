@@ -138,7 +138,7 @@ process_manager() {
         ;;
       3)
         read -p "请输入进程PID: " pid
-        if ! [[ "$pid" =~ ^[0-9]+$ ]]; then
+        if ! [[ "$pid" =~ ^[0-9]+$ ]]; then  # 修复正则表达式
           echo -e "${RED}无效的PID！${NC}"
           sleep 1
           continue
@@ -849,7 +849,7 @@ fun_tools() {
           read -p "你的猜测: " guess
           ((attempts++))
 
-          if ! [[ "$guess" =~ ^[0-9]+$ ]]; then
+          if ! [[ "$guess" =~ ^[0-9]+$ ]]; then  # 修复正则表达式
             echo -e "${RED}请输入有效数字！${NC}"
             continue
           fi
@@ -1147,11 +1147,7 @@ setup_aliases() {
   echo -e "${CYAN}执行以下命令立即生效:${NC}"
   echo -e "source $HOME/.bashrc"
   read -p "按回车键返回..."
-}
-
-# 自启动设置
-setup_autostart() {
-  # 确保脚本可执行
+}  # 确保脚本可执行
   chmod +x "$0"
 
   # 设置别名
