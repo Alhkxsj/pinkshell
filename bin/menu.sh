@@ -1,9 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# [快手啊泠好困想睡觉]专属Termux工具箱 v4.5
+# [Pinkshell]专属Termux工具箱 v4.5
 
 # 加载配置
 if [ -f $HOME/.pinkshell/.config/config.conf ]; then
   source $HOME/.pinkshell/.config/config.conf
+fi
+
+# 检查并创建必要的目录和文件
+mkdir -p $HOME/.pinkshell/.config
+if [ ! -f $HOME/.pinkshell/.config/config.conf ]; then
+  touch $HOME/.pinkshell/.config/config.conf
 fi
 
 # 播放列表文件
@@ -37,13 +43,20 @@ check_dependencies() {
   # 检查其他可能需要的工具
   for tool in curl wget neofetch mpv aria2 nmap; do
     if ! command -v $tool &>/dev/null; then
+      echo -e "${YELLOW}正在安装 $tool...${NC}"
       pkg install -y $tool
     fi
   done
 
   # 运行工具安装器
   echo -e "${PURPLE}[少女终端] 正在运行工具安装器...${NC}"
-  bash $HOME/pinkshell/bin/tools_install.sh
+  if [ -f $HOME/pinkshell/bin/tools_install.sh ]; then
+    bash $HOME/pinkshell/bin/tools_install.sh
+  else
+    echo -e "${RED}错误: 找不到工具安装器 ($HOME/pinkshell/bin/tools_install.sh)${NC}"
+    echo -e "${YELLOW}请重新安装pinkshell${NC}"
+    sleep 3
+  fi
 }
 
 # 动态标题
@@ -52,15 +65,33 @@ welcome_banner() {
   # 兼容模式：当lolcat不可用时使用普通颜色
   if command -v lolcat &>/dev/null; then
     echo -e "${PURPLE}
-    ░█▀▀░█▀█░█░█░▀█▀░█▀▀░█▀▄   ░█▀▀░█▀█░█▀▄░█▀▀
-    ░█▀▀░█░█░█░█░░█░░█▀▀░█▀▄   ░█▀▀░█░█░█░█░█▀▀
-    ░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀   ░▀▀▀░▀▀▀░▀▀▀░▀▀▀
+  _____ _    _ _  __     _____ _          _ _ 
+ |  __ (_)  | | |/ /    / ____| |        | | |
+ | |__) | __| | ' / ___| (___ | |__   ___| | |
+ |  ___/ '__| |  < / _ \___ \| '_ \ / _ \ | |
+ | |   | |  | | . \  __/____) | | | |  __/ | |
+ |_|   |_|  |_|_|\_\___|_____/|_| |_|\___|_|_|
+    _____                    _                        _ 
+ |_   _|                  | |                      | |
+   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |
+   | |/ _ \ '__| '_ \ / _ \ __\ \ /\ / / _ \| '__/ _` |
+  _| |  __/ |  | | | |  __/ |_ \ V  V / (_) | | | (_| |
+ |_____\___|_|  |_| |_|\___|\__| \_/\_/ \___/|_|  \__,_|
     ${NC}" | lolcat -p 0.6
   else
     echo -e "${PURPLE}
-    ░█▀▀░█▀█░█░█░▀█▀░█▀▀░█▀▄   ░█▀▀░█▀█░█▀▄░█▀▀
-    ░█▀▀░█░█░█░█░░█░░█▀▀░█▀▄   ░█▀▀░█░█░█░█░█▀▀
-    ░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀   ░▀▀▀░▀▀▀░▀▀▀░▀▀▀
+  _____ _    _ _  __     _____ _          _ _ 
+ |  __ (_)  | | |/ /    / ____| |        | | |
+ | |__) | __| | ' / ___| (___ | |__   ___| | |
+ |  ___/ '__| |  < / _ \___ \| '_ \ / _ \ | |
+ | |   | |  | | . \  __/____) | | | |  __/ | |
+ |_|   |_|  |_|_|\_\___|_____/|_| |_|\___|_|_|
+    _____                    _                        _ 
+ |_   _|                  | |                      | |
+   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |
+   | |/ _ \ '__| '_ \ / _ \ __\ \ /\ / / _ \| '__/ _` |
+  _| |  __/ |  | | | |  __/ |_ \ V  V / (_) | | | (_| |
+ |_____\___|_|  |_| |_|\___|\__| \_/\_/ \___/|_|  \__,_|
     ${NC}"
   fi
 
@@ -76,35 +107,115 @@ welcome_banner() {
 
 # 彩蛋功能
 show_easter_egg() {
-  echo -e "\n${RED}❤ ${YELLOW}欢迎作者 ${RED}快手啊泠好困想睡觉 ${YELLOW}❤${NC}"
-  for i in {1..5}; do
-    echo -en "${CYAN}✿${PURPLE}❀${GREEN}✤${NC}"
-    sleep 0.2
+  clear
+  welcome_banner
+  
+  # 彩蛋标题动画
+  echo -e "${PURPLE}╔══════════════════════════════════════╗${NC}"
+  echo -e "${PINK}║           🌸 Pinkshell 彩蛋 🌸         ║${NC}"
+  echo -e "${PURPLE}╚══════════════════════════════════════╝${NC}"
+  echo ""
+  
+  # 星星闪烁动画
+  for i in {1..3}; do
+    echo -en "${YELLOW}✨ ${CYAN}🌟 ${GREEN}✨ ${BLUE}🌟 ${NC}"
+    sleep 0.3
+    echo -en "\r${CYAN}🌟 ${GREEN}✨ ${BLUE}🌟 ${YELLOW}✨ ${NC}"
+    sleep 0.3
+    echo -en "\r${GREEN}✨ ${BLUE}🌟 ${YELLOW}✨ ${CYAN}🌟 ${NC}"
+    sleep 0.3
+    echo -en "\r${BLUE}🌟 ${YELLOW}✨ ${CYAN}🌟 ${GREEN}✨ ${NC}"
+    sleep 0.3
   done
-  echo -e "\n${YELLOW}专属彩蛋已触发！${NC}"
-
-  # 显示系统信息
+  echo -e "\n"
+  
+  # 彩蛋内容
+  echo -e "${PINK}══════════════════════════════════════${NC}"
+  echo -e "${CYAN}🎉 欢迎使用 Pinkshell 终端工具箱！${NC}"
+  echo -e "${YELLOW}作者: 快手啊泠好困想睡觉${NC}"
+  echo -e "${GREEN}版本: v4.5${NC}"
+  echo -e "${PINK}══════════════════════════════════════${NC}"
+  
+  # 系统信息
+  echo -e "\n${BLUE}🖥️  系统信息:${NC}"
   if command -v neofetch &>/dev/null; then
-    neofetch | lolcat
+    neofetch --stdout | head -n 10 | lolcat
   else
-    echo -e "${GREEN}系统信息:${NC}"
     echo -e "${CYAN}设备: $(uname -npo)${NC}"
     echo -e "${PURPLE}内核: $(uname -r)${NC}"
     echo -e "${YELLOW}存储: $(df -h / | awk 'NR==2 {print $4}') 可用${NC}"
+    echo -e "${GREEN}内存: $(free -h | awk 'NR==2 {print $7}') 可用${NC}"
   fi
-
-  # 显示随机名言
+  
+  # 彩蛋小游戏
+  echo -e "\n${PINK}🎮 彩蛋小游戏${NC}"
+  echo -e "${YELLOW}猜猜我现在在想什么？${NC}"
+  echo -e "${CYAN}提示: 是一个数字 (1-10)${NC}"
+  
+  # 生成随机数
+  secret_number=$((RANDOM % 10 + 1))
+  attempts=0
+  max_attempts=3
+  
+  while [ $attempts -lt $max_attempts ]; do
+    read -p "$(echo -e "${GREEN}请输入你的猜测 (剩余 $((max_attempts - attempts)) 次机会): ${NC}")" guess
+    
+    # 检查输入是否为数字
+    if ! [[ "$guess" =~ ^[0-9]+$ ]]; then
+      echo -e "${RED}请输入有效数字！${NC}"
+      continue
+    fi
+    
+    attempts=$((attempts + 1))
+    
+    if [ "$guess" -eq "$secret_number" ]; then
+      echo -e "${GREEN}🎉 恭喜你猜对了！${NC}"
+      echo -e "${YELLOW}你真是太厉害了！${NC}"
+      break
+    elif [ "$guess" -lt "$secret_number" ]; then
+      echo -e "${CYAN}太小了！再试一次${NC}"
+    else
+      echo -e "${CYAN}太大了！再试一次${NC}"
+    fi
+    
+    if [ $attempts -eq $max_attempts ]; then
+      echo -e "${YELLOW}答案是: $secret_number${NC}"
+      echo -e "${PINK}没关系，下次一定可以！${NC}"
+    fi
+  done
+  
+  # 随机名言和祝福
   quotes=(
     "代码如诗，逻辑如画，编程是艺术与科学的完美结合。"
     "在0和1的世界里，你是唯一的变量。"
     "每个bug都是成长的机会，每个错误都是进步的阶梯。"
     "编程不是工作，而是创造世界的魔法。"
     "一行代码，一份热爱；一个算法，一份执着。"
+    "代码改变世界，程序创造未来。"
+    "程序是写给人读的，只是顺便能在机器上运行。"
+    "编程是一种思想，而不是一种语言。"
   )
+  
+  blessings=(
+    "愿你的代码永远没有bug！"
+    "愿你的程序运行流畅如飞！"
+    "愿你的创意无限迸发！"
+    "愿你的技术日益精进！"
+    "愿你享受编程的每一刻！"
+    "愿你成为代码世界的魔法师！"
+  )
+  
   random_quote=${quotes[$RANDOM % ${#quotes[@]}]}
+  random_blessing=${blessings[$RANDOM % ${#blessings[@]}]}
+  
   echo -e "\n${PURPLE}「 ${random_quote} 」${NC}" | lolcat
-
-  sleep 4
+  echo -e "\n${PINK}💝 ${random_blessing} ${NC}" | lolcat
+  
+  # 彩虹动画结束
+  echo -e "\n${RED}❤${YELLOW}❤${GREEN}❤${CYAN}❤${BLUE}❤${PURPLE}❤${PINK}❤${NC}"
+  echo -e "${CYAN}感谢使用 Pinkshell！${NC}"
+  echo -e "${GREEN}按任意键返回主菜单...${NC}"
+  read -n 1 -s
 }
 
 # 进程管理
@@ -123,7 +234,8 @@ process_manager() {
       1)
         echo -e "${GREEN}所有进程:${NC}"
         ps -ef | lolcat
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         read -p "请输入进程名: " process_name
@@ -134,7 +246,8 @@ process_manager() {
         fi
         echo -e "${GREEN}查找结果:${NC}"
         ps -ef | grep "$process_name" | grep -v grep | lolcat
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         read -p "请输入进程PID: " pid
@@ -164,7 +277,8 @@ disk_analysis() {
   df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
   echo -e "\n${CYAN}目录大小排行:${NC}"
   du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
-  read -p "按回车键返回..."
+  echo -e "\n${CYAN}按任意键返回...${NC}"
+  read -n 1 -s
 }
 
 # 系统工具菜单
@@ -191,7 +305,8 @@ system_tools() {
           pkg install neofetch -y
           neofetch | lolcat
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         echo -e "${GREEN}存储空间分析:${NC}"
@@ -199,7 +314,8 @@ system_tools() {
         df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
         echo -e "\n${CYAN}目录大小排行:${NC}"
         du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         process_manager
@@ -207,7 +323,8 @@ system_tools() {
       4)
         echo -e "${CYAN}正在更新系统...${NC}"
         pkg update -y && pkg upgrade -y
-        read -p "更新完成，按回车键返回..."
+        echo -e "\n${GREEN}更新完成，按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       5)
         echo -e "${GREEN}磁盘使用详情:${NC}"
@@ -234,7 +351,7 @@ change_termux_source() {
     welcome_banner
     echo -e "${BLUE}========== 更换软件源 ==========${NC}"
     echo -e "${YELLOW}当前软件源:${NC}"
-    grep -oP '(?<=@).*' $PREFIX/etc/apt/sources.list || echo "默认源"
+    grep -o '@[^/]*' $PREFIX/etc/apt/sources.list | sed 's/^@//' || echo "默认源"
     
     echo -e "\n${GREEN}请选择软件源:${NC}"
     echo -e "1. 清华大学源 (推荐)"
@@ -252,28 +369,32 @@ change_termux_source() {
         sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为清华大学源！${NC}"
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         echo -e "${CYAN}正在更换为阿里云源...${NC}"
         sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.aliyun.com/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为阿里云源！${NC}"
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         echo -e "${CYAN}正在更换为南京大学源...${NC}"
         sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirror.nju.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为南京大学源！${NC}"
-        read -p "按回车极返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       4)
-        echo -e "${CYAN}正在更换为官方源...${极NC}"
+        echo -e "${CYAN}正在更换为官方源...${NC}"
         sed -i 's@^#deb\(.*\)@deb\1@' $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为官方源！${NC}"
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       5)
         read -p "请输入自定义源地址: " custom_source
@@ -286,7 +407,8 @@ change_termux_source() {
         sed -i "s@^\(deb.*stable main\)\$@#\1\ndeb $custom_source stable main@" $PREFIX/etc/apt/sources.list
         pkg update -y
         echo -e "${GREEN}已成功更换为自定义源！${NC}"
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       0)
         return
@@ -306,10 +428,11 @@ network_tools() {
     echo -e "${BLUE}========== 网络工具 ==========${NC}"
     echo -e "1. IP信息"
     echo -e "2. 网络测速"
-    echo极 -e "3. 端口扫描"
+    echo -e "3. 端口扫描"
     echo -e "4. 下载工具"
     echo -e "5. 网络诊断"
-    echo -e "0. 返回主菜单\n"
+    echo -e "0. 返回主菜单
+"
     echo -e "${BLUE}==============================${NC}"
 
     read -p "请输入选项 : " choice
@@ -321,7 +444,8 @@ network_tools() {
         else
           ip addr show | grep inet | grep -v inet6 | lolcat
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         echo -e "${YELLOW}正在测试网络速度...${NC}"
@@ -345,7 +469,8 @@ network_tools() {
         else
           echo -e "${RED}无法进行网络测速，请先安装curl${NC}"
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         read -p "请输入要扫描的IP或域名: " target
@@ -383,7 +508,8 @@ network_tools() {
         else
           echo -e "${RED}未找到端口扫描工具，请安装 nmap${NC}"
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       4)
         read -p "请输入下载链接: " url
@@ -413,7 +539,8 @@ network_tools() {
         else
           echo -e "${RED}未找到下载工具，请安装 aria2、curl 或 wget${NC}"
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       5)
         echo -e "${GREEN}网络诊断信息:${NC}"
@@ -449,7 +576,8 @@ network_tools() {
         echo -e "\n${CYAN}DNS解析:${NC}"
         echo -e "${YELLOW}正在测试DNS解析...${NC}"
         nslookup google.com | lolcat
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       0)
         main_menu
@@ -489,7 +617,8 @@ dev_tools() {
           pkg install python -y
           python --version | lolcat
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         if command -v node &>/dev/null; then
@@ -502,20 +631,22 @@ dev_tools() {
           pkg install nodejs -y
           node --version | lolcat
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         if command -v git &>/dev/null; then
           echo -e "${GREEN}Git已安装:${NC}"
           git --version | lolcat
-          echo -e "\n${CYAN}Git配置:极NC}"
+          echo -e "\n${CYAN}Git配置:${NC}"
           git config --list | lolcat
         else
           echo -e "${YELLOW}正在安装Git...${NC}"
           pkg install git -y
           git --version | lolcat
         fi
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       4)
         echo -e "${GREEN}请选择代码编辑器:${NC}"
@@ -565,7 +696,8 @@ dev_tools() {
         pkg install nodejs -y
         npm install -g npm@latest
         echo -e "${GREEN}开发环境配置完成！${NC}"
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       0)
         main_menu
@@ -764,6 +896,26 @@ play_playlist() {
   done
 }
 
+# 搜索本地音乐
+search_local_music() {
+  if [ -f ~/pinkshell/bin/search_utils.sh ]; then
+    source ~/pinkshell/bin/search_utils.sh
+    search_local_music_impl
+  else
+    echo -e "${RED}搜索工具未找到！${NC}"
+  fi
+}
+
+# 搜索本地视频
+search_local_videos() {
+  if [ -f ~/pinkshell/bin/search_utils.sh ]; then
+    source ~/pinkshell/bin/search_utils.sh
+    search_local_videos_impl
+  else
+    echo -e "${RED}搜索工具未找到！${NC}"
+  fi
+}
+
 # 播放列表管理
 manage_playlist() {
   while true; do
@@ -834,6 +986,11 @@ fun_tools() {
     echo -e "3. 视频播放器"
     echo -e "4. 趣味文本生成"
     echo -e "5. 泠泠笑话"
+    echo -e "6. 计算器"
+    echo -e "7. 单位转换器"
+    echo -e "8. 天气查询"
+    echo -e "9. 星座运势"
+    echo -e "10. 文件管理器"
     echo -e "0. 返回主菜单\n"
     echo -e "${BLUE}==============================${NC}"
 
@@ -863,20 +1020,22 @@ fun_tools() {
             break
           fi
         done
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         echo -e "${PURPLE}音乐播放器${NC}"
         echo -e "1. 在线播放"
         echo -e "2. 本地播放"
         echo -e "3. 播放列表管理"
+        echo -e "4. 搜索本地音乐"
         read -p "请选择: " music_choice
 
         case $music_choice in
           1)
             read -p "请输入音乐URL: " music_url
             if [ -z "$music_url" ]; then
-              echo -极 "${RED}URL不能为空！${NC}"
+              echo -e "${RED}URL不能为空！${NC}"
               sleep 1
               continue
             fi
@@ -888,6 +1047,9 @@ fun_tools() {
           3)
             manage_playlist
             ;;
+          4)
+            search_local_music
+            ;;
           *)
             echo -e "${RED}无效选择！${NC}"
             ;;
@@ -895,12 +1057,18 @@ fun_tools() {
         ;;
       3)
         echo -e "${PURPLE}视频播放器${NC}"
-        read -p "请输入视频URL或本地路径: " video_path
-        if [ -z "$video_path" ]; then
-          echo -e "${RED}路径不能为空！${NC}"
-          sleep 1
-          continue
-        fi
+        echo -e "1. 指定路径播放"
+        echo -e "2. 搜索本地视频"
+        read -p "请选择: " video_choice
+
+        case $video_choice in
+          1)
+            read -p "请输入视频URL或本地路径: " video_path
+            if [ -z "$video_path" ]; then
+              echo -e "${RED}路径不能为空！${NC}"
+              sleep 1
+              continue
+            fi
 
         if command -v mpv &>/dev/null; then
           echo -e "${YELLOW}正在播放视频...${NC}"
@@ -910,7 +1078,16 @@ fun_tools() {
           echo -e "${YELLOW}正在播放视频...${NC}"
           mpv "$video_path"
         fi
-        read -p "按回车键返回..."
+        ;;
+      2)
+        search_local_videos
+        ;;
+      *)
+        echo -e "${RED}无效选择！${NC}"
+        ;;
+    esac
+    read -p "按回车键返回..."
+    ;;
         ;;
       4)
         echo -e "${GREEN}趣味文本生成器${NC}"
@@ -947,7 +1124,7 @@ fun_tools() {
             echo "   ██║  ██║██╔══██╗╚══███╔╝██║  ██║██║   ██║"
             echo "   ███████║███████║  ███╔╝ ███████║██║   ██║"
             echo "   ██╔══██║██╔══██║ ███╔╝  ██╔══██║██║   ██║"
-            echo "   ██║  ██║██极  ██║███████╗██║  ██║╚██████╔╝"
+            echo "   ██║  ██║██████║███████╗██║  ██║╚██████╔╝"
             echo "   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ "
             echo -e "${NC}"
             echo -e "${PURPLE}         快手啊泠好困想睡觉${NC}" | lolcat
@@ -956,7 +1133,8 @@ fun_tools() {
             echo -e "${RED}无效选择！${NC}"
             ;;
         esac
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       5)
         jokes=(
@@ -968,7 +1146,8 @@ fun_tools() {
         )
         random_joke=${jokes[$RANDOM % ${#jokes[@]}]}
         echo -e "\n${YELLOW}${random_joke}${NC}" | lolcat
-        read -p "按回车键返回..."
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       0)
         main_menu
@@ -1035,7 +1214,8 @@ personal_settings() {
             echo -e "${RED}无效选择！${NC}"
             ;;
         esac
-        sleep 1
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       2)
         echo -e "${GREEN}请选择终端字体:${NC}"
@@ -1059,7 +1239,8 @@ personal_settings() {
         esac
         
         echo -e "${GREEN}字体已更改，重启Termux生效${NC}"
-        sleep 1
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       3)
         if [ ! -d $HOME/.pinkshell/.config ]; then
@@ -1085,7 +1266,8 @@ personal_settings() {
             ;;
         esac
         
-        sleep 1
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       4)
         echo -e "${PURPLE}正在设置泠泠专属提示符...${NC}"
@@ -1099,7 +1281,8 @@ personal_settings() {
         
         echo -e "${GREEN}专属提示符已设置！重启后生效${NC}"
         echo -e "${YELLOW}提示: 输入 'source $HOME/.bashrc' 立即生效${NC}"
-        sleep 2
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
         ;;
       0)
         main_menu
@@ -1143,11 +1326,11 @@ main_menu() {
       4) fun_tools ;;
       5) personal_settings ;;
       0)
-        echo -e "${GREEN}感谢使用！再见！${NC}"
-        exit 0
+        echo -e "${GREEN}感谢使用Pinkshell！再见！${NC}"
+        return 0
         ;;
       *)
-        echo -e"${RED}无效输入！${NC}"
+        echo -e "${RED}无效输入！${NC}"
         sleep 1
         ;;
     esac
@@ -1156,4 +1339,8 @@ main_menu() {
 
 # 启动脚本
 check_dependencies
-main_menu
+
+# 检查是否从终端直接运行
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main_menu
+fi

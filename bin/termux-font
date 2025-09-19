@@ -1,0 +1,85 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# 模拟 termux-font 命令
+
+show_help() {
+    echo "用法: termux-font [选项]"
+    echo "选项:"
+    echo "  -f, --font FONT        设置字体"
+    echo "  -l, --list             列出可用字体"
+    echo "  -h, --help             显示此帮助信息"
+    echo ""
+    echo "可用字体:"
+    echo "  firacode       FiraCode (程序员最爱)"
+    echo "  meslo          Meslo (清晰易读)"
+    echo "  sourcecodepro  SourceCodePro (专业字体)"
+    echo "  hack           Hack (简洁现代)"
+}
+
+list_fonts() {
+    echo "可用字体:"
+    echo "1. FiraCode (程序员最爱)"
+    echo "2. Meslo (清晰易读)"
+    echo "3. SourceCodePro (专业字体)"
+    echo "4. Hack (简洁现代)"
+}
+
+apply_font() {
+    local font=$1
+    local font_name=""
+    
+    case $font in
+        firacode)
+            font_name="FiraCode"
+            ;;
+        meslo)
+            font_name="Meslo"
+            ;;
+        sourcecodepro)
+            font_name="SourceCodePro"
+            ;;
+        hack)
+            font_name="Hack"
+            ;;
+        *)
+            echo "错误: 未知的字体 '$font'"
+            echo "使用 'termux-font --list' 查看可用字体"
+            return 1
+            ;;
+    esac
+    
+    echo "已选择字体: $font_name"
+    echo "提示: 重启 Termux 以使更改生效"
+}
+
+# 解析命令行参数
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -f|--font)
+            if [ -n "$2" ]; then
+                apply_font "$2"
+                exit 0
+            else
+                echo "错误: --font 选项需要一个参数"
+                exit 1
+            fi
+            ;;
+        -l|--list)
+            list_fonts
+            exit 0
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "错误: 未知选项 '$1'"
+            echo "使用 'termux-font --help' 查看帮助信息"
+            exit 1
+            ;;
+    esac
+done

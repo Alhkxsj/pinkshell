@@ -1,4 +1,4 @@
-# 少女终端工具箱 - Pinkshell
+# 终端工具箱 - Pinkshell
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Alhkxsj/pinkshell/main/assets/logo.png" alt="Pinkshell Logo" width="300">
@@ -6,7 +6,7 @@
 
 ## 🌸 项目简介
 
-少女终端工具箱（Pinkshell）是一款专为Termux设计的实用工具集，提供便捷的系统管理功能和个性化体验。项目采用粉色主题设计，包含多种实用工具和快捷命令，让您的移动终端操作更加高效优雅。
+终端工具箱（Pinkshell）是一款专为Termux设计的实用工具集，提供便捷的系统管理功能和个性化体验。项目采用粉色主题设计，包含多种实用工具和快捷命令，让您的移动终端操作更加高效优雅。
 
 ## 📦 安装指南
 

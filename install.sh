@@ -50,8 +50,14 @@ sed -i 's|~|$HOME|g' "$HOME/pinkshell/bin/tools_install.sh"
 
 add_to_shellrc() {
     local file="$1"
-    grep -q 'pinkshell' "$file" && return
     echo -e "${YELLOW}Updating $file...${NC}"
+    
+    # Remove old pinkshell config if exists
+    if grep -q 'Pinkshell Environment' "$file"; then
+        sed -i '/# ===== Pinkshell Environment =====/,/# ===== End Pinkshell Config =====/d' "$file"
+    fi
+    
+    # Add new pinkshell config
     cat >> "$file" << 'EOF'
 
 # ===== Pinkshell Environment =====
@@ -61,12 +67,6 @@ alias 泠='bash $HOME/pinkshell/bin/menu.sh'
 alias 更新='pkg update && pkg upgrade -y'
 alias 清理='pkg clean'
 alias 存储='df -h'
-
-# Auto start menu if not already run
-if [ -f "$HOME/pinkshell/bin/menu.sh" ] && [ -z "$MENU_ALREADY_RUN" ]; then
-  export MENU_ALREADY_RUN=1
-  bash "$HOME/pinkshell/bin/menu.sh"
-fi
 # ===== End Pinkshell Config =====
 
 EOF
@@ -94,6 +94,5 @@ echo -e "Menu will auto-start next time you open Termux${NC}"
 echo -e "${YELLOW}Installing required tools...${NC}"
 bash "$HOME/pinkshell/bin/tools_install.sh"
 
-echo -e "${PINK}Launching menu in 5 seconds...${NC}"
-sleep 5
-bash "$HOME/pinkshell/bin/menu.sh"
+echo -e "${GREEN}Installation completed successfully!${NC}"
+echo -e "${BLUE}To launch, type: 泠${NC}"

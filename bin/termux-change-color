@@ -1,0 +1,115 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# 模拟 termux-change-color 命令
+
+show_help() {
+    echo "用法: termux-change-color [选项]"
+    echo "选项:"
+    echo "  -s, --scheme SCHEME    应用颜色方案"
+    echo "  -h, --help            显示此帮助信息"
+    echo ""
+    echo "可用的颜色方案:"
+    echo "  pink     少女粉"
+    echo "  purple   星空紫"
+    echo "  blue     海洋蓝"
+    echo "  green    森林绿"
+    echo "  dark     深色主题"
+    echo "  light    浅色主题"
+}
+
+apply_color_scheme() {
+    local scheme=$1
+    local color_name=""
+    
+    case $scheme in
+        pink)
+            color_name="少女粉"
+            echo -e "\033]4;1;#FF69B4\007"  # 红色
+            echo -e "\033]4;2;#FF1493\007"  # 绿色
+            echo -e "\033]4;3;#FF69B4\007"  # 黄色
+            echo -e "\033]4;4;#FF69B4\007"  # 蓝色
+            echo -e "\033]4;5;#FF69B4\007"  # 紫色
+            echo -e "\033]4;6;#FF69B4\007"  # 青色
+            ;;
+        purple)
+            color_name="星空紫"
+            echo -e "\033]4;1;#9370DB\007"  # 红色
+            echo -e "\033]4;2;#8A2BE2\007"  # 绿色
+            echo -e "\033]4;3;#9370DB\007"  # 黄色
+            echo -e "\033]4;4;#9370DB\007"  # 蓝色
+            echo -e "\033]4;5;#9370DB\007"  # 紫色
+            echo -e "\033]4;6;#9370DB\007"  # 青色
+            ;;
+        blue)
+            color_name="海洋蓝"
+            echo -e "\033]4;1;#1E90FF\007"  # 红色
+            echo -e "\033]4;2;#00BFFF\007"  # 绿色
+            echo -e "\033]4;3;#1E90FF\007"  # 黄色
+            echo -e "\033]4;4;#1E90FF\007"  # 蓝色
+            echo -e "\033]4;5;#1E90FF\007"  # 紫色
+            echo -e "\033]4;6;#1E90FF\007"  # 青色
+            ;;
+        green)
+            color_name="森林绿"
+            echo -e "\033]4;1;#32CD32\007"  # 红色
+            echo -e "\033]4;2;#228B22\007"  # 绿色
+            echo -e "\033]4;3;#32CD32\007"  # 黄色
+            echo -e "\033]4;4;#32CD32\007"  # 蓝色
+            echo -e "\033]4;5;#32CD32\007"  # 紫色
+            echo -e "\033]4;6;#32CD32\007"  # 青色
+            ;;
+        dark)
+            color_name="深色主题"
+            echo -e "\033]4;1;#FF4136\007"  # 红色
+            echo -e "\033]4;2;#2ECC40\007"  # 绿色
+            echo -e "\033]4;3;#FFDC00\007"  # 黄色
+            echo -e "\033]4;4;#0074D9\007"  # 蓝色
+            echo -e "\033]4;5;#B10DC9\007"  # 紫色
+            echo -e "\033]4;6;#7FDBFF\007"  # 青色
+            ;;
+        light)
+            color_name="浅色主题"
+            echo -e "\033]4;1;#FF6B6B\007"  # 红色
+            echo -e "\033]4;2;#4ECDC4\007"  # 绿色
+            echo -e "\033]4;3;#FFE66D\007"  # 黄色
+            echo -e "\033]4;4;#1A535C\007"  # 蓝色
+            echo -e "\033]4;5;#FF6B6B\007"  # 紫色
+            echo -e "\033]4;6;#4ECDC4\007"  # 青色
+            ;;
+        *)
+            echo "错误: 未知的颜色方案 '$scheme'"
+            echo "使用 'termux-change-color --help' 查看帮助信息"
+            return 1
+            ;;
+    esac
+    
+    echo "已切换为${color_name}主题"
+}
+
+# 解析命令行参数
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -s|--scheme)
+            if [ -n "$2" ]; then
+                apply_color_scheme "$2"
+                exit 0
+            else
+                echo "错误: --scheme 选项需要一个参数"
+                exit 1
+            fi
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "错误: 未知选项 '$1'"
+            echo "使用 'termux-change-color --help' 查看帮助信息"
+            exit 1
+            ;;
+    esac
+done

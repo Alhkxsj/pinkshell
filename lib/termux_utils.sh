@@ -53,7 +53,7 @@ show_easter_egg() {
             sleep 0.1
         done
     done
-    echo -e "\n${BLINK}${YELLOW} 快手啊泠的专属彩蛋激活！ ${NC}"
+    echo -e "\n${BLINK}${YELLOW} Pinkshell专属彩蛋激活！ ${NC}"
     sleep 2
 }
 
