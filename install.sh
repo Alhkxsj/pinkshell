@@ -1,7 +1,6 @@
 #!/bin/bash
-# Pinkshell Installer by Alhkxsj
+# Pinkshell Installer
 
-# 颜色定义
 PINK='\033[1;35m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
@@ -19,17 +18,14 @@ echo "   ╚═════╝  ╚═════╝  ╚═════╝ ╚
 echo -e "${NC}"
 echo -e "${PINK}[Pinkshell] Installer Starting...${NC}"
 
-# 检查依赖项
 echo -e "${YELLOW}Checking dependencies...${NC}"
 command -v curl &>/dev/null || {
     echo -e "${YELLOW}Installing curl...${NC}"
     pkg update -y && pkg install -y curl
 }
 
-# 创建目录
 mkdir -p "$HOME/pinkshell/bin" "$HOME/pinkshell/lib"
 
-# 下载文件
 echo -e "${YELLOW}Downloading main scripts...${NC}"
 base_url="https://raw.githubusercontent.com/Alhkxsj/pinkshell/main"
 
@@ -49,11 +45,9 @@ download_file "/lib/termux_utils.sh" "$HOME/pinkshell/lib/termux_utils.sh"
 
 chmod +x "$HOME/pinkshell/bin"/*.sh "$HOME/pinkshell/lib"/*.sh
 
-# 修复路径
 sed -i 's|~|$HOME|g' "$HOME/pinkshell/bin/menu.sh"
 sed -i 's|~|$HOME|g' "$HOME/pinkshell/bin/tools_install.sh"
 
-# 自动写入配置
 add_to_shellrc() {
     local file="$1"
     grep -q 'pinkshell' "$file" && return
@@ -81,12 +75,10 @@ EOF
 add_to_shellrc "$HOME/.bashrc"
 add_to_shellrc "$HOME/.zshrc"
 
-# 应用环境变量
 echo -e "${YELLOW}Applying environment changes...${NC}"
 source "$HOME/.bashrc" 2>/dev/null || true
 source "$HOME/.zshrc" 2>/dev/null || true
 
-# 安装提示
 echo -e "${GREEN}"
 echo "██████╗ ██╗   ██╗███████╗"
 echo "██╔═══██╗██║   ██║██╔════╝"
@@ -95,16 +87,13 @@ echo "██║▄▄ ██║██║   ██║██╔══╝  "
 echo "╚██████╔╝╚██████╔╝███████╗"
 echo " ╚══▀▀═╝  ╚═════╝ ╚══════╝"
 echo -e "${NC}"
-
 echo -e "${PINK}[✓] Installed successfully!${NC}"
 echo -e "${BLUE}To launch, type: 泠"
 echo -e "Menu will auto-start next time you open Termux${NC}"
 
-# 首次启动工具安装器
 echo -e "${YELLOW}Installing required tools...${NC}"
 bash "$HOME/pinkshell/bin/tools_install.sh"
 
-# 延迟首次启动
 echo -e "${PINK}Launching menu in 5 seconds...${NC}"
 sleep 5
 bash "$HOME/pinkshell/bin/menu.sh"
