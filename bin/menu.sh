@@ -24,6 +24,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 PURPLE='\033[1;35m'
 CYAN='\033[1;36m'
+PINK='\033[1;95m'
 NC='\033[0m'
 
 # 检查依赖
@@ -59,46 +60,42 @@ check_dependencies() {
   fi
 }
 
-# 动态标题
+# 动态标题 - 修复版本
 welcome_banner() {
   clear
   # 兼容模式：当lolcat不可用时使用普通颜色
   if command -v lolcat &>/dev/null; then
-    echo -e "\${PURPLE}
-  _____ _    _ _  __     _____ _          _ _ 
- |  __ (_)  | | |/ /    / ____| |        | | |
- | |__) | __| | ' / ___| (___ | |__   ___| | |
- |  ___/ '__| |  < / _ \___ \| '_ \ / _ \ | |
- | |   | |  | | . \  __/____) | | | |  __/ | |
- |_|   |_|  |_|_|\_\___|_____/|_| |_|\___|_|_|
-    _____                    _                        _ 
- |_   _|                  | |                      | |
-   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |
-   | |/ _ \ '__| '_ \ / _ \ __\ \ /\ / / _ \| '__/ _` |
-  _| |  __/ |  | | | |  __/ |_ \ V  V / (_) | | | (_| |
- |_____\___|_|  |_| |_|\___|\__| \_/\_/ \___/|_|  \__,_|
-    \${NC}" | lolcat -p 0.6
-  else
-    echo -e "${PURPLE}
-  _____ _    _ _  __     _____ _          _ _ 
- |  __ (_)  | | |/ /    / ____| |        | | |
- | |__) | __| | ' / ___| (___ | |__   ___| | |
- |  ___/ '__| |  < / _ \___ \| '_ \ / _ \ | |
- | |   | |  | | . \  __/____) | | | |  __/ | |
- |_|   |_|  |_|_|\_\___|_____/|_| |_|\___|_|_|
-    _____                    _                        _ 
- |_   _|                  | |                      | |
-   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |
-   | |/ _ \ '__| '_ \ / _ \ __\ \ /\ / / _ \| '__/ _` |
-  _| |  __/ |  | | | |  __/ |_ \ V  V / (_) | | | (_| |
- |_____|\___|_|  |_| |_|\___|\__| \_/\_/ \___/|_|  \__,_|
-    ${NC}"
-  fi
-
-  if command -v lolcat &>/dev/null; then
+    # 直接使用echo输出ASCII艺术，不使用heredoc
+    echo "  _____ _    _ _  __     _____ _          _ _ " 
+    echo " |  __ (_)  | | |/ /    / ____| |        | | |"
+    echo " | |__) | __| | ' / ___| (___ | |__   ___| | |"
+    echo " |  ___/ '__| |  < / _ \\___ \\| '_ \\ / _ \\ | |"
+    echo " | |   | |  | | . \\  __/____) | | | |  __/ | |"
+    echo " |_|   |_|  |_|_|\\_\\___|_____/|_| |_|\\___|_|_|"
+    echo "    _____                    _                        _ "
+    echo " |_   _|                  | |                      | |"
+    echo "   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |"
+    echo "   | |/ _ \\ '__| '_ \\ / _ \\ __\\ \\ /\\ / / _ \\| '__/ _\` |"
+    echo "  _| |  __/ |  | | | |  __/ |_ \\ V  V / (_) | | | (_| |"
+    echo " |_____\\___|_|  |_| |_|\\___|\\__| \\_/\\_/ \\___/|_|  \\__,_|" | lolcat -p 0.6
+    echo ""
     echo "◆ 作者：快手啊泠好困想睡觉 ◆" | lolcat
     echo "► 日期：$(date +'%Y-%m-%d %H:%M') ◄" | lolcat
   else
+    echo -e "${PURPLE}"
+    echo "  _____ _    _ _  __     _____ _          _ _ "
+    echo " |  __ (_)  | | |/ /    / ____| |        | | |"
+    echo " | |__) | __| | ' / ___| (___ | |__   ___| | |"
+    echo " |  ___/ '__| |  < / _ \\___ \\| '_ \\ / _ \\ | |"
+    echo " | |   | |  | | . \\  __/____) | | | |  __/ | |"
+    echo " |_|   |_|  |_|_|\\_\\___|_____/|_| |_|\\___|_|_|"
+    echo "    _____                    _                        _ "
+    echo " |_   _|                  | |                      | |"
+    echo "   | | ___ _ __ _ __   ___| |___      _____  _ __ __| |"
+    echo "   | |/ _ \\ '__| '_ \\ / _ \\ __\\ \\ /\\ / / _ \\| '__/ _\` |"
+    echo "  _| |  __/ |  | | | |  __/ |_ \\ V  V / (_) | | | (_| |"
+    echo " |_____\\___|_|  |_| |_|\\___|\\__| \\_/\\_/ \\___/|_|  \\__,_|"
+    echo -e "${NC}"
     echo -e "${CYAN}◆ 作者：${YELLOW}快手啊泠好困想睡觉 ${CYAN}◆${NC}"
     echo -e "${GREEN}► 日期：$(date +'%Y-%m-%d %H:%M') ◄${NC}"
   fi
@@ -208,8 +205,13 @@ show_easter_egg() {
   random_quote=${quotes[$RANDOM % ${#quotes[@]}]}
   random_blessing=${blessings[$RANDOM % ${#blessings[@]}]}
   
-  echo -e "\n${PURPLE}「 ${random_quote} 」${NC}" | lolcat
-  echo -e "\n${PINK}💝 ${random_blessing} ${NC}" | lolcat
+  if command -v lolcat &>/dev/null; then
+    echo -e "\n${PURPLE}「 ${random_quote} 」${NC}" | lolcat
+    echo -e "\n${PINK}💝 ${random_blessing} ${NC}" | lolcat
+  else
+    echo -e "\n${PURPLE}「 ${random_quote} 」${NC}"
+    echo -e "\n${PINK}💝 ${random_blessing} ${NC}"
+  fi
   
   # 彩虹动画结束
   echo -e "\n${RED}❤${YELLOW}❤${GREEN}❤${CYAN}❤${BLUE}❤${PURPLE}❤${PINK}❤${NC}"
@@ -233,7 +235,11 @@ process_manager() {
     case $choice in
       1)
         echo -e "${GREEN}所有进程:${NC}"
-        ps -ef | lolcat
+        if command -v lolcat &>/dev/null; then
+          ps -ef | lolcat
+        else
+          ps -ef
+        fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
         ;;
@@ -245,7 +251,11 @@ process_manager() {
           continue
         fi
         echo -e "${GREEN}查找结果:${NC}"
-        ps -ef | grep "$process_name" | grep -v grep | lolcat
+        if command -v lolcat &>/dev/null; then
+          ps -ef | grep "$process_name" | grep -v grep | lolcat
+        else
+          ps -ef | grep "$process_name" | grep -v grep
+        fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
         ;;
@@ -274,9 +284,17 @@ process_manager() {
 # 磁盘分析
 disk_analysis() {
   echo -e "${CYAN}文件系统使用情况:${NC}"
-  df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+  if command -v lolcat &>/dev/null; then
+    df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+  else
+    df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6
+  fi
   echo -e "\n${CYAN}目录大小排行:${NC}"
-  du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+  if command -v lolcat &>/dev/null; then
+    du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+  else
+    du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10
+  fi
   echo -e "\n${CYAN}按任意键返回...${NC}"
   read -n 1 -s
 }
@@ -299,11 +317,19 @@ system_tools() {
     case $choice in
       1)
         if command -v neofetch &>/dev/null; then
-          neofetch | lolcat
+          if command -v lolcat &>/dev/null; then
+            neofetch | lolcat
+          else
+            neofetch
+          fi
         else
           echo -e "${YELLOW}正在安装neofetch...${NC}"
           pkg install neofetch -y
-          neofetch | lolcat
+          if command -v lolcat &>/dev/null; then
+            neofetch | lolcat
+          else
+            neofetch
+          fi
         fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
@@ -311,9 +337,17 @@ system_tools() {
       2)
         echo -e "${GREEN}存储空间分析:${NC}"
         echo -e "${CYAN}文件系统使用情况:${NC}"
-        df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+        if command -v lolcat &>/dev/null; then
+          df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6 | lolcat
+        else
+          df -h | awk 'NR==1{print $0}NR>1{print $0 | "sort -k5 -rn"}' | head -n 6
+        fi
         echo -e "\n${CYAN}目录大小排行:${NC}"
-        du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+        if command -v lolcat &>/dev/null; then
+          du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10 | lolcat
+        else
+          du -h -d 1 $HOME/ 2>/dev/null | sort -hr | head -n 10
+        fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
         ;;
@@ -334,7 +368,6 @@ system_tools() {
         change_termux_source
         ;;
       0)
-        main_menu
         return
         ;;
       *)
@@ -389,6 +422,14 @@ change_termux_source() {
         read -n 1 -s
         ;;
       4)
+        echo -e "${CYAN}正在更换为北京外国语大学源...${NC}"
+        sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.bfsu.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
+        pkg update -y
+        echo -e "${GREEN}已成功更换为北京外国语大学源！${NC}"
+        echo -e "\n${CYAN}按任意键返回...${NC}"
+        read -n 1 -s
+        ;;
+      5)
         echo -e "${CYAN}正在更换为官方源...${NC}"
         sed -i 's@^#deb\(.*\)@deb\1@' $PREFIX/etc/apt/sources.list
         pkg update -y
@@ -396,7 +437,7 @@ change_termux_source() {
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
         ;;
-      5)
+      6)
         read -p "请输入自定义源地址: " custom_source
         if [ -z "$custom_source" ]; then
           echo -e "${RED}源地址不能为空！${NC}"
@@ -440,9 +481,23 @@ network_tools() {
       1)
         echo -e "${GREEN}IP地址信息:${NC}"
         if command -v curl &>/dev/null; then
-          curl ipinfo.io | lolcat
+          if command -v lolcat &>/dev/null; then
+            curl -s https://ipinfo.io | lolcat
+          else
+            curl -s https://ipinfo.io
+          fi
+        elif command -v curl &>/dev/null; then
+          if command -v lolcat &>/dev/null; then
+            curl -s https://www.ip.cn | lolcat
+          else
+            curl -s https://www.ip.cn
+          fi
         else
-          ip addr show | grep inet | grep -v inet6 | lolcat
+          if command -v lolcat &>/dev/null; then
+            ip addr show | grep inet | grep -v inet6 | lolcat
+          else
+            ip addr show | grep inet | grep -v inet6
+          fi
         fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
@@ -453,19 +508,28 @@ network_tools() {
         if command -v iperf3 &>/dev/null; then
           echo -e "${CYAN}使用iperf3测试网络速度...${NC}"
           echo -e "${YELLOW}正在连接测试服务器...${NC}"
-          iperf3 -c speedtest.serverius.net -p 5002 -P 4 | lolcat
+          if command -v lolcat &>/dev/null; then
+            iperf3 -c speedtest.telepoint.bg -p 5002 -P 4 | lolcat
+          else
+            iperf3 -c speedtest.telepoint.bg -p 5002 -P 4
+          fi
         elif command -v curl &>/dev/null; then
           echo -e "${CYAN}使用文件下载速度测试...${NC}"
-          echo -e "${YELLOW}测试下载速度（通过Google）...${NC}"
+          echo -e "${YELLOW}测试下载速度（通过国内服务器）...${NC}"
           start_time=$(date +%s)
-          download_size=$(curl -s -w '%{size_download}' -o /dev/null https://www.google.com)
+          # 使用国内的测速URL
+          download_size=$(curl -s -w '%{size_download}' -o /dev/null https://www.baidu.com)
           end_time=$(date +%s)
           time_elapsed=$((end_time - start_time))
           if [ $time_elapsed -eq 0 ]; then
               time_elapsed=1
           fi
           speed=$((download_size * 8 / time_elapsed / 1000))
-          echo -e "${GREEN}下载速度: ${speed} kbps${NC}" | lolcat
+          if command -v lolcat &>/dev/null; then
+            echo -e "${GREEN}下载速度: ${speed} kbps${NC}" | lolcat
+          else
+            echo -e "${GREEN}下载速度: ${speed} kbps${NC}"
+          fi
         else
           echo -e "${RED}无法进行网络测速，请先安装curl${NC}"
         fi
@@ -481,13 +545,17 @@ network_tools() {
         # 优先使用 nmap
         if command -v nmap &>/dev/null; then
           echo -e "${YELLOW}正在使用 nmap 扫描 $target ...${NC}"
-          nmap -T4 $target | lolcat
+          if command -v lolcat &>/dev/null; then
+            nmap -T4 $target | lolcat
+          else
+            nmap -T4 $target
+          fi
         
         # 其次使用 ncat (nmap 的一部分)
         elif command -v ncat &>/dev/null; then
           echo -e "${YELLOW}正在使用 ncat 进行快速端口扫描 $target ...${NC}"
           for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
-            timeout 1 ncat -zv $target $port 2>&1 | grep succeeded | lolcat
+            timeout 1 ncat -zv $target $port 2>&1 | grep -i open
           done
         
         # 使用 Python 替代方案
@@ -495,14 +563,14 @@ network_tools() {
           echo -e "${YELLOW}正在使用 Python 端口扫描器扫描 $target ...${NC}"
           for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
             echo "扫描端口 $port ..."
-            $HOME/pinkshell/bin/nc $target $port <<< "QUIT" 2>/dev/null && echo "端口 $port 开放" | lolcat
+            $HOME/pinkshell/bin/nc $target $port <<< "QUIT" 2>/dev/null && echo "端口 $port 开放"
           done
         
         # 最后尝试 busybox
         elif command -v busybox &>/dev/null; then
           echo -e "${YELLOW}正在使用 busybox 扫描 $target ...${NC}"
           for port in {20,21,22,23,25,53,80,110,143,443,465,587,993,995,1433,1521,3306,3389,5432,5900,8080}; do
-            timeout 1 busybox nc -zv $target $port 2>&1 | grep succeeded | lolcat
+            timeout 1 busybox nc -zv $target $port 2>&1 | grep -i open
           done
         
         else
@@ -545,29 +613,83 @@ network_tools() {
       5)
         echo -e "${GREEN}网络诊断信息:${NC}"
         echo -e "${CYAN}网络连接状态:${NC}"
-        echo -e "${YELLOW}正在测试与Google的连接...${NC}"
+        echo -e "${YELLOW}正在测试与国内服务器的连接...${NC}"
         
         # 优先使用 ncat
         if command -v ncat &>/dev/null; then
-          ncat -zv google.com 80 2>&1 | lolcat
+          echo -e "${CYAN}测试与百度的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            ncat -zv baidu.com 80 2>&1 | lolcat
+          else
+            ncat -zv baidu.com 80 2>&1
+          fi
+          echo -e "${CYAN}测试与新浪的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            ncat -zv sina.com.cn 80 2>&1 | lolcat
+          else
+            ncat -zv sina.com.cn 80 2>&1
+          fi
         # 其次使用 Python 替代方案
         elif [ -f "$HOME/pinkshell/bin/nc" ]; then
-          $HOME/pinkshell/bin/nc google.com 80 <<< "HEAD / HTTP/1.1\nHost: google.com\n\n" | lolcat
+          echo -e "${CYAN}测试与百度的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            $HOME/pinkshell/bin/nc baidu.com 80 <<< "HEAD / HTTP/1.1\nHost: baidu.com\n\n" | lolcat
+          else
+            $HOME/pinkshell/bin/nc baidu.com 80 <<< "HEAD / HTTP/1.1\nHost: baidu.com\n\n"
+          fi
+          echo -e "${CYAN}测试与新浪的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            $HOME/pinkshell/bin/nc sina.com.cn 80 <<< "HEAD / HTTP/1.1\nHost: sina.com.cn\n\n" | lolcat
+          else
+            $HOME/pinkshell/bin/nc sina.com.cn 80 <<< "HEAD / HTTP/1.1\nHost: sina.com.cn\n\n"
+          fi
         # 使用 busybox
         elif command -v busybox &>/dev/null; then
-          busybox nc -zv google.com 80 2>&1 | lolcat
+          echo -e "${CYAN}测试与百度的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            busybox nc -zv baidu.com 80 2>&1 | lolcat
+          else
+            busybox nc -zv baidu.com 80 2>&1
+          fi
+          echo -e "${CYAN}测试与新浪的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            busybox nc -zv sina.com.cn 80 2>&1 | lolcat
+          else
+            busybox nc -zv sina.com.cn 80 2>&1
+          fi
         else
-          ping -c 4 google.com | lolcat
+          echo -e "${CYAN}测试与百度的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            ping -c 4 baidu.com | lolcat
+          else
+            ping -c 4 baidu.com
+          fi
+          echo -e "${CYAN}测试与新浪的连接...${NC}"
+          if command -v lolcat &>/dev/null; then
+            ping -c 4 sina.com.cn | lolcat
+          else
+            ping -c 4 sina.com.cn
+          fi
         fi
         
         echo -e "\n${CYAN}路由追踪:${NC}"
         if command -v traceroute &>/dev/null; then
-          traceroute google.com | lolcat
+          echo -e "${CYAN}追踪到百度的路由...${NC}"
+          if command -v lolcat &>/dev/null; then
+            traceroute baidu.com | lolcat
+          else
+            traceroute baidu.com
+          fi
         else
           echo -e "${YELLOW}正在安装traceroute...${NC}"
           pkg install traceroute -y
           if command -v traceroute &>/dev/null; then
-            traceroute google.com | lolcat
+            echo -e "${CYAN}追踪到百度的路由...${NC}"
+            if command -v lolcat &>/dev/null; then
+              traceroute baidu.com | lolcat
+            else
+              traceroute baidu.com
+            fi
           else
             echo -e "${RED}安装失败！请手动安装: pkg install traceroute${NC}"
           fi
@@ -575,12 +697,22 @@ network_tools() {
         
         echo -e "\n${CYAN}DNS解析:${NC}"
         echo -e "${YELLOW}正在测试DNS解析...${NC}"
-        nslookup google.com | lolcat
+        echo -e "${CYAN}解析百度域名...${NC}"
+        if command -v lolcat &>/dev/null; then
+          nslookup baidu.com | lolcat
+        else
+          nslookup baidu.com
+        fi
+        echo -e "${CYAN}解析新浪域名...${NC}"
+        if command -v lolcat &>/dev/null; then
+          nslookup sina.com.cn | lolcat
+        else
+          nslookup sina.com.cn
+        fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
         ;;
       0)
-        main_menu
         return
         ;;
       *)
@@ -609,13 +741,25 @@ dev_tools() {
       1)
         if command -v python &>/dev/null; then
           echo -e "${GREEN}Python已安装:${NC}"
-          python --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            python --version | lolcat
+          else
+            python --version
+          fi
           echo -e "\n${CYAN}Python包列表:${NC}"
-          pip list | lolcat
+          if command -v lolcat &>/dev/null; then
+            pip list | lolcat
+          else
+            pip list
+          fi
         else
           echo -e "${YELLOW}正在安装Python...${NC}"
           pkg install python -y
-          python --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            python --version | lolcat
+          else
+            python --version
+          fi
         fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
@@ -623,13 +767,25 @@ dev_tools() {
       2)
         if command -v node &>/dev/null; then
           echo -e "${GREEN}Node.js已安装:${NC}"
-          node --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            node --version | lolcat
+          else
+            node --version
+          fi
           echo -e "\n${CYAN}npm全局包列表:${NC}"
-          npm list -g --depth=0 | lolcat
+          if command -v lolcat &>/dev/null; then
+            npm list -g --depth=0 | lolcat
+          else
+            npm list -g --depth=0
+          fi
         else
           echo -e "${YELLOW}正在安装Node.js...${NC}"
           pkg install nodejs -y
-          node --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            node --version | lolcat
+          else
+            node --version
+          fi
         fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
@@ -637,13 +793,25 @@ dev_tools() {
       3)
         if command -v git &>/dev/null; then
           echo -e "${GREEN}Git已安装:${NC}"
-          git --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            git --version | lolcat
+          else
+            git --version
+          fi
           echo -e "\n${CYAN}Git配置:${NC}"
-          git config --list | lolcat
+          if command -v lolcat &>/dev/null; then
+            git config --list | lolcat
+          else
+            git config --list
+          fi
         else
           echo -e "${YELLOW}正在安装Git...${NC}"
           pkg install git -y
-          git --version | lolcat
+          if command -v lolcat &>/dev/null; then
+            git --version | lolcat
+          else
+            git --version
+          fi
         fi
         echo -e "\n${CYAN}按任意键返回...${NC}"
         read -n 1 -s
@@ -700,7 +868,6 @@ dev_tools() {
         read -n 1 -s
         ;;
       0)
-        main_menu
         return
         ;;
       *)
@@ -925,7 +1092,11 @@ manage_playlist() {
     # 显示当前播放列表
     echo -e "${GREEN}当前播放列表:${NC}"
     if [ -f "$PLAYLIST_FILE" ] && [ -s "$PLAYLIST_FILE" ]; then
-      nl -w 2 -s '. ' "$PLAYLIST_FILE" | lolcat
+      if command -v lolcat &>/dev/null; then
+        nl -w 2 -s '. ' "$PLAYLIST_FILE" | lolcat
+      else
+        nl -w 2 -s '. ' "$PLAYLIST_FILE"
+      fi
     else
       echo -e "${YELLOW}播放列表为空${NC}"
     fi
@@ -964,6 +1135,9 @@ manage_playlist() {
           echo -e "${RED}播放列表为空！${NC}"
         fi
         sleep 1
+        ;;
+      0)
+              sleep 1
         ;;
       0)
         return
@@ -1082,13 +1256,13 @@ fun_tools() {
             ;;
           2)
             search_local_videos
+            ;;
+          *)
+            echo -e "${RED}无效选择！${NC}"
+            ;;
+        esac
+        read -p "按回车键返回..."
         ;;
-      *)
-        echo -e "${RED}无效选择！${NC}"
-        ;;
-    esac
-    read -p "按回车键返回..."
-    ;;
       4)
         echo -e "${GREEN}趣味文本生成器${NC}"
         echo -e "1. ASCII艺术"
@@ -1150,7 +1324,6 @@ fun_tools() {
         read -n 1 -s
         ;;
       0)
-        main_menu
         return
         ;;
       *)
@@ -1161,7 +1334,7 @@ fun_tools() {
   done
 }
 
-# 个性化设置菜单
+# 主菜单
 main_menu() {
   while true; do
     welcome_banner
