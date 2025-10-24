@@ -19,6 +19,7 @@ PINKSHOME="$HOME/pinkshell"
 REPO_URL="https://github.com/Alhkxsj/pinkshell"
 BACKUP_URL="https://cdn.jsdelivr.net/gh/Alhkxsj/pinkshell"
 INSTALL_LOG="$HOME/.pinkshell_install.log"
+export PINKSHELL_INSTALLING=1
 
 # 日志函数
 log() {
@@ -531,8 +532,8 @@ alias 天气='curl -s "wttr.in?format=3"'
 alias pinkshell='bash $PINKSHOME/bin/pinkshell.sh'
 alias ps-tool='bash $PINKSHOME/bin/pinkshell.sh'
 
-# 启动问候语 (仅在交互式shell中显示)
-if [[ $- == *i* ]]; then
+# 启动问候语 (仅在交互式shell中显示，且不是在安装过程中)
+if [[ $- == *i* ]] && [ -z "$PINKSHELL_INSTALLING" ]; then
     echo -e "\033[1;35m🌸 Pinkshell 终端工具箱已就绪! \033[0m"
     echo -e "\033[1;36m输入 '\033[1;33m泠\033[1;36m' 或 '\033[1;33mpinkshell\033[1;36m' 启动工具箱\033[0m"
 fi
@@ -776,6 +777,9 @@ main() {
     verify_installation
     show_installation_result
     cleanup_installation
+    
+    # 安装完成，取消安装标志
+    unset PINKSHELL_INSTALLING
 }
 
 # 错误处理
