@@ -12,10 +12,10 @@ declare -g CYAN='\033[1;36m'
 declare -g PINK='\033[1;35m'
 declare -g NC='\033[0m'
 
-declare -g PUMPSHELL_HOME="${PUMPSHELL_HOME:-$HOME/pinkshell}"
+declare -g PINKSHOME="${PINKSHOME:-$HOME/pinkshell}"
 declare -g CONFIG_DIR="${CONFIG_DIR:-$HOME/.pinkshell/.config}"
 declare -g LOG_DIR="${LOG_DIR:-$HOME/.pinkshell/logs}"
-declare -g PLAYLIST_FILE="${PLAYLIST_FILE:-$PUMPSHELL_HOME/playlist.txt}"
+declare -g PLAYLIST_FILE="${PLAYLIST_FILE:-$PINKSHOME/playlist.txt}"
 
 initialize_pinkshell() {
     mkdir -p "$CONFIG_DIR" "$LOG_DIR"
@@ -97,8 +97,8 @@ welcome_banner() {
         display_cmd="cat"
     fi
     
-    if [ -f "$PUMPSHELL_HOME/assets/pinkshell_ascii.txt" ]; then
-        cat "$PUMPSHELL_HOME/assets/pinkshell_ascii.txt" | $display_cmd
+    if [ -f "$PINKSHOME/assets/pinkshell_ascii.txt" ]; then
+        cat "$PINKSHOME/assets/pinkshell_ascii.txt" | $display_cmd
     else
         echo -e "${PINK}"
         cat << "EOF"

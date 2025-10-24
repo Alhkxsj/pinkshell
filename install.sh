@@ -15,7 +15,7 @@ CYAN='\033[1;36m'
 NC='\033[0m'
 
 # 全局变量
-PUMPSHELL_HOME="$HOME/pinkshell"
+PINKSHOME="$HOME/pinkshell"
 REPO_URL="https://github.com/Alhkxsj/pinkshell"
 BACKUP_URL="https://cdn.jsdelivr.net/gh/Alhkxsj/pinkshell"
 INSTALL_LOG="$HOME/.pinkshell_install.log"
@@ -204,11 +204,11 @@ create_directory_structure() {
     log "创建目录结构..."
     
     local directories=(
-        "$PUMPSHELL_HOME"
-        "$PUMPSHELL_HOME/bin"
-        "$PUMPSHELL_HOME/lib"
-        "$PUMPSHELL_HOME/lib/modules"
-        "$PUMPSHELL_HOME/assets"
+        "$PINKSHOME"
+        "$PINKSHOME/bin"
+        "$PINKSHOME/lib"
+        "$PINKSHOME/lib/modules"
+        "$PINKSHOME/assets"
         "$HOME/.pinkshell"
         "$HOME/.pinkshell/.config"
         "$HOME/.pinkshell/logs"
@@ -282,7 +282,7 @@ download_core_files() {
     
     # 下载每个文件
     for file in "${core_files[@]}"; do
-        local dest="$PUMPSHELL_HOME/$file"
+        local dest="$PINKSHOME/$file"
         download_file "$file" "$dest"
         
         # 设置执行权限
@@ -292,7 +292,7 @@ download_core_files() {
     done
     
     # 创建必要的空文件
-    touch "$PUMPSHELL_HOME/playlist.txt"
+    touch "$PINKSHOME/playlist.txt"
     touch "$HOME/.pinkshell/.config/config.conf"
     
     log "核心文件下载完成"
@@ -303,7 +303,7 @@ create_fallback_commands() {
     log "创建备用命令..."
     
     # termux-change-color 替代
-    cat > "$PUMPSHELL_HOME/bin/termux-change-color" << 'EOF'
+    cat > "$PINKSHOME/bin/termux-change-color" << 'EOF'
 #!/bin/bash
 # termux-change-color 模拟实现
 
@@ -371,7 +371,7 @@ esac
 EOF
 
     # termux-font 替代
-    cat > "$PUMPSHELL_HOME/bin/termux-font" << 'EOF'
+    cat > "$PINKSHOME/bin/termux-font" << 'EOF'
 #!/bin/bash
 # termux-font 模拟实现
 
@@ -425,7 +425,7 @@ esac
 EOF
 
     # 创建 netcat 替代脚本
-    cat > "$PUMPSHELL_HOME/bin/nc" << 'EOF'
+    cat > "$PINKSHOME/bin/nc" << 'EOF'
 #!/bin/bash
 # netcat 替代脚本
 
@@ -469,9 +469,9 @@ else
 fi
 EOF
 
-    chmod +x "$PUMPSHELL_HOME/bin/termux-change-color" \
-             "$PUMPSHELL_HOME/bin/termux-font" \
-             "$PUMPSHELL_HOME/bin/nc"
+    chmod +x "$PINKSHOME/bin/termux-change-color" \
+             "$PINKSHOME/bin/termux-font" \
+             "$PINKSHOME/bin/nc"
     
     log "备用命令创建完成"
 }
@@ -512,14 +512,14 @@ setup_shell_environment() {
     local pinkshell_config=$(cat << 'EOF'
 
 # ===== Pinkshell 终端工具箱配置 =====
-export PUMPSHELL_HOME="$HOME/pinkshell"
-export PATH="$PATH:$PUMPSHELL_HOME/bin"
+export PINKSHOME="$HOME/pinkshell"
+export PATH="$PATH:$PINKSHOME/bin"
 
 # 加载工具函数库
-[ -f "$PUMPSHELL_HOME/lib/termux_utils.sh" ] && source "$PUMPSHELL_HOME/lib/termux_utils.sh"
+[ -f "$PINKSHOME/lib/termux_utils.sh" ] && source "$PINKSHOME/lib/termux_utils.sh"
 
 # 主命令别名
-alias 泠='bash $PUMPSHELL_HOME/bin/pinkshell.sh'
+alias 泠='bash $PINKSHOME/bin/pinkshell.sh'
 alias 更新='pkg update && pkg upgrade -y'
 alias 清理='pkg clean'
 alias 存储='df -h'
@@ -528,12 +528,14 @@ alias 网络='netstat -tuln'
 alias 天气='curl -s "wttr.in?format=3"'
 
 # 工具箱快捷命令
-alias pinkshell='bash $PUMPSHELL_HOME/bin/pinkshell.sh'
-alias ps-tool='bash $PUMPSHELL_HOME/bin/pinkshell.sh'
+alias pinkshell='bash $PINKSHOME/bin/pinkshell.sh'
+alias ps-tool='bash $PINKSHOME/bin/pinkshell.sh'
 
-# 启动问候语
-echo -e "\033[1;35m🌸 Pinkshell 终端工具箱已就绪! \033[0m"
-echo -e "\033[1;36m输入 '\033[1;33m泠\033[1;36m' 或 '\033[1;33mpinkshell\033[1;36m' 启动工具箱\033[0m"
+# 启动问候语 (仅在交互式shell中显示)
+if [[ $- == *i* ]]; then
+    echo -e "\033[1;35m🌸 Pinkshell 终端工具箱已就绪! \033[0m"
+    echo -e "\033[1;36m输入 '\033[1;33m泠\033[1;36m' 或 '\033[1;33mpinkshell\033[1;36m' 启动工具箱\033[0m"
+fi
 # ===== Pinkshell 配置结束 =====
 
 EOF
@@ -630,7 +632,7 @@ DEFAULT_MIRROR="tuna"
 EOF
 
     # 版本文件
-    cat > "$PUMPSHELL_HOME/version" << EOF
+    cat > "$PINKSHOME/version" << EOF
 PUMPSHELL_VERSION=4.5
 INSTALL_DATE=$(date +%Y-%m-%d)
 INSTALL_TIME=$(date +%H:%M:%S)
@@ -638,7 +640,7 @@ INSTALL_SHELL=$(detect_shell)
 EOF
 
     # 创建工具安装标记
-    touch "$PUMPSHELL_HOME/.tools_installed"
+    touch "$PINKSHOME/.tools_installed"
     
     log "配置文件创建完成"
 }
@@ -648,12 +650,12 @@ set_permissions() {
     log "设置文件权限..."
     
     # 设置所有脚本为可执行
-    find "$PUMPSHELL_HOME/bin" -name "*.sh" -exec chmod +x {} \;
-    find "$PUMPSHELL_HOME/lib/modules" -name "*.sh" -exec chmod +x {} \;
+    find "$PINKSHOME/bin" -name "*.sh" -exec chmod +x {} \;
+    find "$PINKSHOME/lib/modules" -name "*.sh" -exec chmod +x {} \;
     
     # 设置配置文件权限
     chmod 600 "$HOME/.pinkshell/.config/config.conf"
-    chmod 700 "$PUMPSHELL_HOME/bin" "$PUMPSHELL_HOME/lib/modules"
+    chmod 700 "$PINKSHOME/bin" "$PINKSHOME/lib/modules"
     
     log "文件权限设置完成"
 }
@@ -662,8 +664,8 @@ set_permissions() {
 run_tools_installer() {
     log "运行工具安装器..."
     
-    if [ -f "$PUMPSHELL_HOME/bin/tools_install.sh" ]; then
-        if bash "$PUMPSHELL_HOME/bin/tools_install.sh"; then
+    if [ -f "$PINKSHOME/bin/tools_install.sh" ]; then
+        if bash "$PINKSHOME/bin/tools_install.sh"; then
             log "工具安装器执行成功"
         else
             warn "工具安装器执行过程中出现错误"
@@ -679,10 +681,10 @@ verify_installation() {
     
     local missing_files=()
     local essential_files=(
-        "$PUMPSHELL_HOME/bin/pinkshell.sh"
-        "$PUMPSHELL_HOME/bin/menu.sh"
-        "$PUMPSHELL_HOME/lib/modules/core.sh"
-        "$PUMPSHELL_HOME/lib/termux_utils.sh"
+        "$PINKSHOME/bin/pinkshell.sh"
+        "$PINKSHOME/bin/menu.sh"
+        "$PINKSHOME/lib/modules/core.sh"
+        "$PINKSHOME/lib/termux_utils.sh"
     )
     
     for file in "${essential_files[@]}"; do
@@ -696,7 +698,7 @@ verify_installation() {
     fi
     
     # 测试主命令
-    if ! "$PUMPSHELL_HOME/bin/pinkshell.sh" --test 2>/dev/null; then
+    if ! "$PINKSHOME/bin/pinkshell.sh" --test 2>/dev/null; then
         warn "启动器测试失败，但安装将继续"
     fi
     
@@ -716,7 +718,7 @@ show_installation_result() {
     echo
     echo -e "${CYAN}基本信息:${NC}"
     echo -e "  版本: ${GREEN}v4.5 完整修复版${NC}"
-    echo -e "  路径: ${BLUE}$PUMPSHELL_HOME${NC}"
+    echo -e "  路径: ${BLUE}$PINKSHOME${NC}"
     echo -e "  配置: ${YELLOW}$HOME/.pinkshell/${NC}"
     echo -e "  Shell: ${PURPLE}$current_shell${NC}"
     echo

@@ -14,8 +14,8 @@ CYAN='\033[1;36m'
 NC='\033[0m'
 
 # 全局路径定义
-PUMPSHELL_HOME="$HOME/pinkshell"
-MODULES_DIR="$PUMPSHELL_HOME/lib/modules"
+PINKSHOME="$HOME/pinkshell"
+MODULES_DIR="$PINKSHOME/lib/modules"
 CONFIG_DIR="$HOME/.pinkshell/.config"
 LOG_DIR="$HOME/.pinkshell/logs"
 
@@ -38,7 +38,7 @@ check_environment() {
     fi
     
     # 检查pinkshell目录是否存在
-    if [ ! -d "$PUMPSHELL_HOME" ]; then
+    if [ ! -d "$PINKSHOME" ]; then
         show_emergency_error "Pinkshell未安装" "请运行: bash <(curl -fsSL https://raw.githubusercontent.com/Alhkxsj/pinkshell/main/install.sh)"
         return 1
     fi
@@ -112,8 +112,8 @@ load_module() {
 # 显示启动信息
 show_startup_info() {
     local version="4.5"
-    if [ -f "$PUMPSHELL_HOME/version" ]; then
-        version=$(grep "PUMPSHELL_VERSION" "$PUMPSHELL_HOME/version" | cut -d= -f2)
+    if [ -f "$PINKSHOME/version" ]; then
+        version=$(grep "PUMPSHELL_VERSION" "$PINKSHOME/version" | cut -d= -f2)
     fi
     
     echo -e "${GREEN}╔══════════════════════════════════════╗${NC}"
@@ -121,7 +121,7 @@ show_startup_info() {
     echo -e "${GREEN}║            版本 $version              ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════╝${NC}"
     echo -e "${CYAN}启动时间: $(date '+%Y-%m-%d %H:%M:%S')${NC}"
-    echo -e "${BLUE}安装路径: $PUMPSHELL_HOME${NC}"
+    echo -e "${BLUE}安装路径: $PINKSHOME${NC}"
     echo
 }
 
@@ -189,9 +189,9 @@ main() {
     echo -e "${GREEN}正在启动主菜单...${NC}"
     echo
     
-    if [ -f "$PUMPSHELL_HOME/bin/menu.sh" ]; then
-        if security_check "$PUMPSHELL_HOME/bin/menu.sh"; then
-            exec bash "$PUMPSHELL_HOME/bin/menu.sh"
+    if [ -f "$PINKSHOME/bin/menu.sh" ]; then
+        if security_check "$PINKSHOME/bin/menu.sh"; then
+            exec bash "$PINKSHOME/bin/menu.sh"
         else
             echo -e "${RED}主菜单文件安全检查失败${NC}"
             exit 1
